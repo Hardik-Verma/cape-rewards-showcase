@@ -1,0 +1,33 @@
+Welcome back!
+
+I have completely rebranded the entire website from "Cheap Cape Codes" to "CAPEVERSE" with the slogan "CHEAP. FAST. LEGIT."
+I also updated the copy to reflect your exact workflow: Complete survey -> Get code -> Redeem for temporary role -> Enter giveaways.
+
+Here is exactly what you need to do manually to finish this update:
+
+### 1. Update the Logo
+I saw the new purple Capeverse logo in the screenshot, but I cannot download it directly from Discord!
+1. Download the new purple Capeverse logo from Discord.
+2. Save it inside your `cape-reward-system` folder (replace the old `logo.png`).
+3. Open your terminal in this folder and run:
+   `node resize_logo.js`
+   (This will instantly compress it and generate the perfect `public/logo.png` and `public/favicon.ico`).
+
+### 2. Upload to InfinityFree
+Now that the website is completely updated and the logo is processed:
+1. Open your InfinityFree File Manager.
+2. Open the `htdocs` folder.
+3. Drag and drop the following files from your local `cape-reward-system/public` folder into InfinityFree to overwrite the old ones:
+   - `index.html`
+   - `about.html`
+   - `claim.html`
+   - `logo.png` (The newly resized one)
+   - `favicon.ico` (The newly created favicon)
+
+### 3. Discord Bot / Linkvertise Setup
+Since you have multiple giveaways with different roles, you will need to:
+1. **Linkvertise**: Create multiple target links (or one main one) that redirect to your Discord bot authorization URL or to a hidden channel.
+2. **Discord Bot (e.g. Ticket Tool / Custom Bot)**: Set up the bot so that when someone redeems a code, it assigns them a *temporary role* (e.g., "Giveaway Access").
+3. **Giveaway Bot (e.g. GiveawayBoat)**: Host your giveaways in Discord and set the requirement to require the "Giveaway Access" role you just created!
+
+Once you do these steps, the entire automated funnel is 100% complete and fully branded as CAPEVERSE!
