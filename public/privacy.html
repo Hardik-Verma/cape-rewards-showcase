@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | Cape Rewards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { obsidian: '#000000' }, fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap');
+        body { background-color: #000000; color: #ffffff; overflow-x: hidden; }
+        .noise {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1; opacity: 0.04;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+        }
+        .nav-glass { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-panel {
+            background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        .glow-border { position: relative; }
+        .glow-border::before {
+            content: ""; position: absolute; top: -1px; left: -1px; right: -1px; bottom: -1px;
+            background: linear-gradient(45deg, #ff0000, #333333, #ffffff, #333333, #ff0000); background-size: 400%; z-index: -1; filter: blur(8px); animation: glowing 15s linear infinite; border-radius: 17px; opacity: 0.3;
+        }
+        @keyframes glowing { 0% { background-position: 0 0; } 50% { background-position: 400% 0; } 100% { background-position: 0 0; } }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div class="noise"></div>
+
+    <nav class="nav-glass fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="flex items-center justify-between h-24">
+                <div class="flex-shrink-0">
+                    <a href="/index.html" class="text-white font-black text-xl md:text-2xl tracking-[0.2em] uppercase hover:text-red-500 transition-colors">Cape Rewards</a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-12">
+                        <a href="/index.html" class="text-gray-400 hover:text-white transition-colors font-bold text-xs tracking-widest uppercase px-3 py-2">Home</a>
+                        <a href="/claim.html" class="text-gray-400 hover:text-white transition-colors font-bold text-xs tracking-widest uppercase px-3 py-2">Claim</a>
+                        <a href="https://discord.com/channels/1511260578902052996/1519908293202677921" target="_blank" class="text-gray-400 hover:text-white transition-colors font-bold text-xs tracking-widest uppercase px-3 py-2">Support</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-4xl mx-auto pt-32 pb-16 px-6 lg:px-8 w-full z-20">
+        <div class="glow-border">
+            <div class="glass-panel rounded-2xl p-8 md:p-12 relative bg-black">
+                <h1 class="text-4xl md:text-5xl font-black uppercase tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-white">Privacy Policy</h1>
+                <p class="text-red-500 mb-12 text-xs uppercase tracking-widest font-bold">Last Updated: July 25, 2026</p>
+
+                <div class="space-y-10 text-gray-400 font-light leading-relaxed">
+                    <section class="border-l-2 border-red-900/50 pl-6 hover:border-red-500 transition-colors">
+                        <h2 class="text-xl font-bold text-white mb-3 uppercase tracking-wide">1. Information We Collect</h2>
+                        <p>We collect minimal data necessary for the functionality of our platform. This includes:</p>
+                        <ul class="list-disc pl-5 mt-2 space-y-2 marker:text-red-600">
+                            <li>Anonymous session IDs generated locally on your browser.</li>
+                            <li>IP addresses temporarily logged for security and anti-bypass rate-limiting.</li>
+                            <li>Discord IDs only when you choose to redeem a key via our official Discord bot.</li>
+                        </ul>
+                    </section>
+
+                    <section class="border-l-2 border-red-900/50 pl-6 hover:border-red-500 transition-colors">
+                        <h2 class="text-xl font-bold text-white mb-3 uppercase tracking-wide">2. How We Use Your Information</h2>
+                        <p>Your session ID is used exclusively to verify that you have successfully completed a sponsored task on the third-party CPA network and to securely generate your redemption key. We do not sell, rent, or share your personal data with marketing agencies.</p>
+                    </section>
+
+                    <section class="border-l-2 border-red-900/50 pl-6 hover:border-red-500 transition-colors">
+                        <h2 class="text-xl font-bold text-white mb-3 uppercase tracking-wide">3. Cookies and Local Storage</h2>
+                        <p>We use local storage within your browser (`localStorage`) to save your session ID and completed survey keys. This ensures you do not lose your reward if you accidentally close the tab. You can clear this data at any time via your browser settings.</p>
+                    </section>
+
+                    <section class="border-l-2 border-red-900/50 pl-6 hover:border-red-500 transition-colors">
+                        <h2 class="text-xl font-bold text-white mb-3 uppercase tracking-wide">4. Security</h2>
+                        <p>The security of your data is paramount. We employ advanced anti-bypass mechanisms and rate-limiting to protect our servers and your session integrity. However, no method of transmission over the Internet is 100% secure.</p>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full py-12 border-t border-gray-900 mt-auto bg-[#050505] relative z-20">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
+            <div class="mb-6 md:mb-0 text-center md:text-left">
+                <span class="text-white font-black text-lg tracking-[0.2em] uppercase">Cape Rewards</span>
+                <p class="text-gray-600 text-xs mt-2 leading-relaxed">&copy; 2026 Cape Rewards. All rights reserved.<br>Protected by advanced anti-bypass security protocols.</p>
+            </div>
+            <div class="flex space-x-8 text-xs tracking-widest uppercase font-semibold">
+                <a href="/terms.html" class="text-gray-500 hover:text-white hover:text-red-500 transition-colors">Terms</a>
+                <a href="/privacy.html" class="text-white transition-colors">Privacy</a>
+                <a href="https://discord.com/channels/1511260578902052996/1519908293202677921" target="_blank" class="text-gray-500 hover:text-white hover:text-red-500 transition-colors">Support</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
