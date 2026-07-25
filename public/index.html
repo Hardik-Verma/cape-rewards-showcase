@@ -334,7 +334,7 @@
 
         // 1. PRIORITY LOAD: Load ONLY the very first frame to instantly unlock the website
         const firstImg = new Image();
-        firstImg.src = '/frames/001.png';
+        firstImg.src = '/frames/001.webp';
         firstImg.onload = () => {
             images[1] = firstImg;
             renderFrame(1);
@@ -354,7 +354,7 @@
             for (let i = 2; i <= frameCount; i++) {
                 const img = new Image();
                 img.decoding = 'async';
-                img.src = `/frames/${i.toString().padStart(3, '0')}.png`;
+                img.src = `/frames/${i.toString().padStart(3, '0')}.webp`;
                 img.onload = () => { images[i] = img; };
             }
         }
