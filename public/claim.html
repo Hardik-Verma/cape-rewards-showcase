@@ -103,12 +103,9 @@
                         <h2 class="text-2xl font-semibold text-white mb-2 tracking-wide">Secure Verification</h2>
                         <p class="text-gray-400 text-sm">Proceed to the verification step below. Do not close this tab.</p>
                     </div>
-                    <button id="start-btn" onclick="startFlow()" class="w-full bg-white text-black hover:bg-red-600 hover:text-white font-bold py-4 px-6 rounded-xl tracking-wide uppercase text-sm transition-colors duration-300">
+                    <!-- Mapped to testFlow() directly so the client can test the flow without a survey -->
+                    <button id="start-btn" onclick="testFlow()" class="w-full bg-white text-black hover:bg-red-600 hover:text-white font-bold py-4 px-6 rounded-xl tracking-wide uppercase text-sm transition-colors duration-300">
                         Verify & Unlock
-                    </button>
-                    <!-- Client Testing Bypass -->
-                    <button onclick="testFlow()" class="mt-4 text-[10px] text-gray-600 uppercase tracking-widest hover:text-white transition-colors">
-                        [Client Test: Simulate Completion]
                     </button>
                 </div>
 
@@ -180,7 +177,7 @@
             localStorage.setItem('local_user_id', localUserId);
         }
 
-        fetch('/api/config').then(res => res.json()).then(data => {
+        fetch('https://cape-rewards-showcase.onrender.com/api/config').then(res => res.json()).then(data => {
             cpaUrl = data.cpaUrl;
         });
 
@@ -219,8 +216,8 @@
             document.getElementById('step-processing').classList.remove('hidden');
             
             try {
-                // Ping the test backend endpoint
-                await fetch(`/api/test-postback?user_id=${localUserId}`);
+                // Ping the test backend endpoint on Render
+                await fetch(`https://cape-rewards-showcase.onrender.com/api/test-postback?user_id=${localUserId}`);
                 // Instantly check status
                 checkStatus();
             } catch (e) {
@@ -230,7 +227,7 @@
 
         async function checkStatus() {
             try {
-                const res = await fetch(`/api/check-status?user_id=${localUserId}`);
+                const res = await fetch(`https://cape-rewards-showcase.onrender.com/api/check-status?user_id=${localUserId}`);
                 const data = await res.json();
 
                 if (data.status === 'completed' && data.token) {
