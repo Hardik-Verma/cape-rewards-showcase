@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: cape-rewards-backend
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # The following should be added securely in the Render Dashboard, not hardcoded here:
+      # - DISCORD_TOKEN
+      # - POSTBACK_SECRET
+      # - REWARD_ROLE_ID

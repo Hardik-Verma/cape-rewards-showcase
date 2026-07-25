@@ -36,6 +36,23 @@ router.get('/postback', (req, res) => {
     });
 });
 
+// FOR CLIENT TESTING ONLY - Simulate a postback without needing a secret
+router.get('/test-postback', (req, res) => {
+    const { user_id } = req.query;
+    if (!user_id) return res.status(400).json({ error: 'Missing user_id' });
+
+    const token = uuidv4();
+    db.run('INSERT INTO tokens (token, user_id) VALUES (?, ?)', [token, user_id], function(err) {
+        if (err) {
+            console.error('Error inserting test token:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        
+        console.log(`Generated TEST bypass token ${token} for user ${user_id}`);
+        res.status(200).json({ success: true, token });
+    });
+});
+
 // Polling endpoint for the frontend to check if their token is ready
 router.get('/check-status', (req, res) => {
     const { user_id } = req.query;

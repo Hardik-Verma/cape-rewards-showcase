@@ -106,6 +106,10 @@
                     <button id="start-btn" onclick="startFlow()" class="w-full bg-white text-black hover:bg-red-600 hover:text-white font-bold py-4 px-6 rounded-xl tracking-wide uppercase text-sm transition-colors duration-300">
                         Verify & Unlock
                     </button>
+                    <!-- Client Testing Bypass -->
+                    <button onclick="testFlow()" class="mt-4 text-[10px] text-gray-600 uppercase tracking-widest hover:text-white transition-colors">
+                        [Client Test: Simulate Completion]
+                    </button>
                 </div>
 
                 <!-- Step 2: Polling -->
@@ -165,13 +169,7 @@
             if(e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) e.preventDefault();
             if(e.ctrlKey && e.keyCode == 85) e.preventDefault();
         });
-        setInterval(function() {
-            const before = new Date().getTime();
-            debugger; 
-            if (new Date().getTime() - before > 100) {
-                document.body.innerHTML = "<div class='flex min-h-screen items-center justify-center text-red-500 text-2xl font-bold bg-black'>Security Violation Detected.</div>";
-            }
-        }, 1000);
+        // (Devtools block removed for Opera GX compatibility)
 
         // --- CORE GATEWAY LOGIC ---
         let cpaUrl = '';
@@ -213,6 +211,20 @@
 
             if (!pollingInterval) {
                 pollingInterval = setInterval(checkStatus, 3000);
+            }
+        }
+
+        async function testFlow() {
+            document.getElementById('step-start').classList.add('hidden');
+            document.getElementById('step-processing').classList.remove('hidden');
+            
+            try {
+                // Ping the test backend endpoint
+                await fetch(`/api/test-postback?user_id=${localUserId}`);
+                // Instantly check status
+                checkStatus();
+            } catch (e) {
+                console.error("Test flow error", e);
             }
         }
 

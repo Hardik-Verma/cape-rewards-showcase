@@ -2,7 +2,9 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Cape Rewards | Official Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -27,7 +29,7 @@
 
         /* Premium Film Grain Overlay */
         .noise {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 50; opacity: 0.05;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; pointer-events: none; z-index: 50; opacity: 0.05;
             background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
         }
 
@@ -51,6 +53,7 @@
             position: sticky;
             top: 0;
             height: 100vh;
+            height: 100dvh; /* Prevents iOS Safari address bar from breaking scroll math */
             width: 100vw;
             overflow: hidden;
             display: flex;
@@ -159,7 +162,7 @@
 
             <!-- Intro Hero (Fades out immediately on scroll) -->
             <div class="detail-panel panel-center" id="intro-hero" style="opacity: 1; transform: translate(-50%, -50%);">
-                <h1 class="text-6xl md:text-8xl font-black uppercase tracking-widest text-white mb-2">Capes Showcase</h1>
+                <h1 class="text-4xl sm:text-6xl md:text-8xl font-black uppercase tracking-widest text-white mb-2 whitespace-nowrap">Capes Showcase</h1>
                 <div class="text-xs uppercase tracking-[0.4em] text-gray-400 mb-8">Scroll To Unlock</div>
                 
                 <!-- Dedicated Auto-Play Button -->
@@ -185,7 +188,7 @@
                 <div class="text-[0.65rem] tracking-[0.4em] uppercase text-gray-500 mb-3 flex items-center gap-4">
                     <span class="w-12 h-[2px] bg-red-600"></span> Phase 1
                 </div>
-                <h1 class="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white m-0 mb-4">Experience</h1>
+                <h1 class="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter text-white m-0 mb-4">Experience</h1>
                 <p class="text-sm text-gray-400 font-light leading-relaxed mb-8">
                     A testament to absolute dedication and timeless prestige. The Experience Cape features a deeply woven, battle-tested fabric that cascades elegantly as you move. A true symbol of your veteran journey.
                 </p>
@@ -207,7 +210,7 @@
                 <div class="text-[0.65rem] tracking-[0.4em] uppercase text-gray-500 mb-3 flex items-center justify-end gap-4">
                     Phase 2 <span class="w-12 h-[2px] bg-red-600"></span>
                 </div>
-                <h1 class="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white m-0 mb-4">Moonlight</h1>
+                <h1 class="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter text-white m-0 mb-4">Moonlight</h1>
                 <p class="text-sm text-gray-400 font-light leading-relaxed mb-8 ml-auto text-right">
                     An exclusive, ethereal aesthetic crafted from luminescent threads. The Moonlight Cape absorbs ambient shadows, projecting a brilliant, dynamic glow that perfectly illuminates your presence in the darkest nights.
                 </p>
@@ -229,7 +232,7 @@
                 <div class="text-[0.65rem] tracking-[0.4em] uppercase text-gray-500 mb-3 flex items-center gap-4">
                     <span class="w-12 h-[2px] bg-red-600"></span> Phase 3
                 </div>
-                <h1 class="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white m-0 mb-4">The Crafter</h1>
+                <h1 class="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter text-white m-0 mb-4">The Crafter</h1>
                 <p class="text-sm text-gray-400 font-light leading-relaxed mb-8">
                     The pinnacle of artisanal mastery. Meticulously stitched with rare, golden accents, the Crafter Cape stands as a mythic testament to your creative prowess and unrivaled dedication to the craft.
                 </p>
@@ -248,7 +251,7 @@
 
             <!-- 4. Final CTA (Fades in Center at the end) -->
             <div class="detail-panel panel-center" id="panel-cta">
-                <h2 class="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-8">Ready to Claim?</h2>
+                <h2 class="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-8">Ready to Claim?</h2>
                 <a href="/claim.html" onclick="transitionToClaim(event)" class="inline-block bg-white text-black hover:bg-red-600 hover:text-white transition-colors duration-300 font-black py-5 px-12 rounded-xl tracking-widest uppercase text-sm shadow-[0_0_30px_rgba(255,0,0,0.2)]">
                     Enter Secure Gateway
                 </a>
