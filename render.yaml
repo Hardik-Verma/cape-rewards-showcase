@@ -2,9 +2,11 @@ services:
   - type: web
     name: cape-rewards-backend
     env: node
-    buildCommand: npm install sqlite3 --build-from-source && npm install
+    buildCommand: npm install
     startCommand: node server.js
     envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
       - key: NODE_ENV
         value: production
       # The following should be added securely in the Render Dashboard, not hardcoded here:
