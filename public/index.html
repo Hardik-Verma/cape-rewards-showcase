@@ -385,7 +385,6 @@
                 onUpdate: () => {
                     const f = Math.floor(frames.frame);
                     renderFrame(f);
-                    
                     // --- AUDIO SYNC LOGIC ---
                     if (soundEnabled) {
                         // Only scrub audio manually when NOT autoplaying
@@ -421,6 +420,24 @@
                 end: "bottom bottom",
                 scrub: 1
             }
+        });
+
+        // Initial frame render
+        renderFrame(1);
+        
+        // Scroll Fade Animation for the new sections
+        gsap.utils.toArray('.scroll-fade').forEach(element => {
+            gsap.to(element, {
+                scrollTrigger: {
+                    trigger: element,
+                    start: "top 80%",
+                    end: "top 50%",
+                    scrub: 1,
+                    once: false
+                },
+                opacity: 1,
+                y: 0
+            });
         });
 
         tl.to("#intro-hero", { opacity: 0, y: -50, pointerEvents: "none", duration: 2 }, 0);
