@@ -217,11 +217,23 @@
             
             try {
                 // Ping the test backend endpoint on Render
-                await fetch(`https://cape-rewards-showcase.onrender.com/api/test-postback?user_id=${localUserId}`);
-                // Instantly check status
-                checkStatus();
+                const res = await fetch(`https://cape-rewards-showcase.onrender.com/api/test-postback?user_id=${localUserId}`);
+                const data = await res.json();
+                
+                if (data.success && data.token) {
+                    localStorage.setItem('survey_key', data.token);
+                    showSuccess(data.token);
+                } else {
+                    console.error("Test flow returned invalid data:", data);
+                    alert("Error retrieving key. Please try again.");
+                    document.getElementById('step-processing').classList.add('hidden');
+                    document.getElementById('step-start').classList.remove('hidden');
+                }
             } catch (e) {
                 console.error("Test flow error", e);
+                alert("Could not connect to the backend API.");
+                document.getElementById('step-processing').classList.add('hidden');
+                document.getElementById('step-start').classList.remove('hidden');
             }
         }
 
