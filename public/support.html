@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giveaway Verification | CAPEVERSE</title>
+    <title>Support Center | CAPEVERSE</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -25,24 +25,6 @@
             overflow: hidden;
         }
 
-        .star {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: #ffffff;
-            border-radius: 50%;
-            animation: fall linear infinite;
-            opacity: 0;
-        }
-
-        @keyframes fall {
-            0% { transform: translateY(-100vh) translateX(0); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(100vh) translateX(-20vw); opacity: 0; }
-        }
-
-        /* Generate multiple stars via box-shadow in a single div to save DOM nodes */
         .stars-layer1 {
             width: 1px; height: 1px; background: transparent;
             box-shadow: 10vw 20vh #fff, 30vw 40vh #fff, 50vw 10vh #fff, 70vw 80vh #fff, 90vw 30vh #fff, 20vw 60vh #fff, 80vw 50vh #fff, 40vw 90vh #fff, 60vw 70vh #fff;
@@ -61,12 +43,6 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.5);
         }
-
-        .btn-premium { background: #ffffff; color: #000000; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .btn-premium:hover { background: #e0e0e0; transform: scale(1.02); }
-
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        .spinner { border: 2px solid rgba(255,255,255,0.1); border-top: 2px solid #ffffff; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
 
         body { animation: fadeIn 1s ease forwards; }
         @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
@@ -121,13 +97,13 @@
                             About
                             <span class="absolute left-0 bottom-0 w-0 h-[1px] bg-red-600 transition-all duration-300 ease-out group-hover:w-full"></span>
                         </a>
-                        <a href="/claim.html" class="relative group text-white px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase">
+                        <a href="/claim.html" class="relative group text-gray-500 hover:text-white px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase">
                             Claim
-                            <span class="absolute left-0 bottom-0 w-full h-[1px] bg-red-600 transition-all duration-300 ease-out"></span>
-                        </a>
-                        <a href="/support.html" class="relative group text-gray-500 hover:text-white px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase">
-                            Support
                             <span class="absolute left-0 bottom-0 w-0 h-[1px] bg-red-600 transition-all duration-300 ease-out group-hover:w-full"></span>
+                        </a>
+                        <a href="/support.html" class="relative group text-white px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase">
+                            Support
+                            <span class="absolute left-0 bottom-0 w-full h-[1px] bg-red-600 transition-all duration-300 ease-out"></span>
                         </a>
                     </div>
                 </div>
@@ -137,54 +113,20 @@
 
     <main class="flex-grow flex flex-col items-center justify-center pt-24 pb-12 px-4 sm:px-6 lg:px-8 z-20">
         <div class="text-center max-w-3xl mx-auto mb-16">
-            <h2 class="text-5xl md:text-6xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-6">Giveaway Access</h2>
-            <p class="text-sm tracking-widest uppercase text-gray-500 font-semibold">Action Required to proceed.</p>
+            <h2 class="text-5xl md:text-6xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-6">Support Center</h2>
+            <p class="text-sm tracking-widest uppercase text-gray-500 font-semibold">We are here to assist you.</p>
         </div>
 
         <div class="glow-border w-full max-w-md">
             <div class="glass-panel w-full rounded-2xl p-10 relative">
-                <div id="survey-container" class="space-y-6 relative z-10">
-                <!-- Step 1: Start -->
-                <div id="step-start" class="text-center">
+                <div class="text-center">
                     <div class="mb-10">
-                        <h2 class="text-2xl font-semibold text-white mb-2 tracking-wide">Action Required</h2>
-                        <p class="text-gray-400 text-sm">Proceed to the next step below. Do not close this tab.</p>
+                        <h2 class="text-2xl font-semibold text-white mb-2 tracking-wide">Need Help?</h2>
+                        <p class="text-gray-400 text-sm">Join our official support server for dedicated assistance.</p>
                     </div>
-                    <!-- Mapped to real startFlow() so it goes to the actual CPA network -->
-                    <button id="start-btn" onclick="startFlow()" class="w-full bg-white text-black hover:bg-red-600 hover:text-white font-bold py-4 px-6 rounded-xl tracking-wide uppercase text-sm transition-colors duration-300">
-                        Complete Task & Unlock
-                    </button>
-                </div>
-
-                <!-- Step 2: Polling -->
-                <div id="step-processing" class="hidden text-center py-6">
-                    <div class="flex flex-col items-center justify-center">
-                        <div class="spinner mb-6"></div>
-                        <h3 class="text-xl font-medium text-white mb-2 tracking-wide">Awaiting Signal...</h3>
-                        <p class="text-gray-400 text-sm">Please complete the task in the new tab. Return to this page once the task is complete.</p>
-                    </div>
-                </div>
-
-                <!-- Step 3: Success & Key -->
-                <div id="step-success" class="hidden space-y-6">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
-                        <h3 class="text-2xl font-bold text-white tracking-wide">Access Granted</h3>
-                        <p class="text-gray-400 text-sm mt-2">Here is your one-time reward key.</p>
-                    </div>
-
-                    <div class="bg-black/80 border border-gray-800 rounded-xl p-6 relative group">
-                        <code id="key-display" class="selectable block text-center text-white font-mono text-xl break-all select-all">Loading...</code>
-                        <button onclick="copyKey()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors" title="Copy to clipboard">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                        </button>
-                    </div>
-
-                    <div class="text-center mt-8">
-                        <p class="text-[0.6rem] text-gray-500 uppercase tracking-widest">Return to Discord and click Redeem Key.</p>
-                    </div>
+                    <a href="https://discord.com/channels/1511260578902052996/1519908293202677921" target="_blank" class="block w-full bg-white text-black hover:bg-red-600 hover:text-white font-bold py-4 px-6 rounded-xl tracking-wide uppercase text-sm transition-colors duration-300">
+                        Go to Support
+                    </a>
                 </div>
             </div>
         </div>
@@ -231,79 +173,12 @@
     </footer>
 
     <script>
-        // --- ANTI-BYPASS & DEVTOOLS PROTECTION ---
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', function(e) {
             if(e.keyCode == 123) e.preventDefault(); 
             if(e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) e.preventDefault();
             if(e.ctrlKey && e.keyCode == 85) e.preventDefault();
         });
-        // (Devtools block removed for Opera GX compatibility)
-
-        // --- CORE GATEWAY LOGIC ---
-        let cpaUrl = '';
-        let localUserId = localStorage.getItem('local_user_id');
-
-        if (!localUserId) {
-            localUserId = 'usr_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('local_user_id', localUserId);
-        }
-
-        fetch('https://cape-rewards-showcase.onrender.com/api/config').then(res => res.json()).then(data => {
-            cpaUrl = data.cpaUrl;
-        });
-
-        // Removed window.onload so a page refresh clears the code!
-        
-        function showSuccess(token) {
-            document.getElementById('key-display').innerText = token;
-            document.getElementById('step-start').classList.add('hidden');
-            document.getElementById('step-processing').classList.add('hidden');
-            document.getElementById('step-success').classList.remove('hidden');
-        }
-
-        let pollingInterval = null;
-
-        function startFlow() {
-            if (!cpaUrl) return alert('Configuration error. Please try again in a moment.');
-
-            const finalUrl = cpaUrl + localUserId;
-            window.open(finalUrl, '_blank');
-
-            document.getElementById('step-start').classList.add('hidden');
-            document.getElementById('step-processing').classList.remove('hidden');
-
-            if (!pollingInterval) {
-                pollingInterval = setInterval(checkStatus, 3000);
-            }
-
-            // AUTOMATED BYPASS FOR TESTING
-            setTimeout(() => {
-                fetch(`https://cape-rewards-showcase.onrender.com/api/test-postback?user_id=${localUserId}`);
-            }, 6000);
-        }
-
-        async function checkStatus() {
-            try {
-                const res = await fetch(`https://cape-rewards-showcase.onrender.com/api/check-status?user_id=${localUserId}`);
-                const data = await res.json();
-
-                if (data.status === 'completed' && data.token) {
-                    clearInterval(pollingInterval);
-                    localStorage.setItem('survey_key', data.token);
-                    showSuccess(data.token);
-                }
-            } catch (e) {
-                console.error("Polling error", e);
-            }
-        }
-
-        function copyKey() {
-            const keyText = document.getElementById('key-display').innerText;
-            navigator.clipboard.writeText(keyText).then(() => {
-                alert('Key copied to clipboard!');
-            });
-        }
     </script>
 </body>
 </html>
