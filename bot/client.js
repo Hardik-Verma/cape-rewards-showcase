@@ -28,8 +28,26 @@ if (fs.existsSync(commandsPath)) {
     }
 }
 
-client.once('ready', () => {
+client.once('ready', async () => {
     console.log(`Ready! Logged in as ${client.user.tag}`);
+    
+    // Auto-register slash commands
+    try {
+        const { REST, Routes } = require('discord.js');
+        const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+        const commandsData = client.commands.map(cmd => cmd.data.toJSON());
+        
+        console.log(`Started refreshing ${commandsData.length} application (/) commands.`);
+        
+        const data = await rest.put(
+            Routes.applicationCommands(client.user.id),
+            { body: commandsData },
+        );
+        
+        console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+    } catch (error) {
+        console.error('Error registering slash commands:', error);
+    }
 });
 
 client.on('interactionCreate', async interaction => {
