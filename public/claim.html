@@ -107,8 +107,8 @@
 
     <main class="flex-grow flex flex-col items-center justify-center pt-24 pb-12 px-4 sm:px-6 lg:px-8 z-20">
         <div class="text-center max-w-3xl mx-auto mb-16">
-            <h2 class="text-5xl md:text-6xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-6">Giveaway Verification</h2>
-            <p class="text-sm tracking-widest uppercase text-gray-500 font-semibold">Verification Required to proceed.</p>
+            <h2 class="text-5xl md:text-6xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-6">Giveaway Access</h2>
+            <p class="text-sm tracking-widest uppercase text-gray-500 font-semibold">Action Required to proceed.</p>
         </div>
 
         <div class="glow-border w-full max-w-md">
@@ -117,12 +117,12 @@
                 <!-- Step 1: Start -->
                 <div id="step-start" class="text-center">
                     <div class="mb-10">
-                        <h2 class="text-2xl font-semibold text-white mb-2 tracking-wide">Verification Required</h2>
-                        <p class="text-gray-400 text-sm">Proceed to the verification step below. Do not close this tab.</p>
+                        <h2 class="text-2xl font-semibold text-white mb-2 tracking-wide">Action Required</h2>
+                        <p class="text-gray-400 text-sm">Proceed to the next step below. Do not close this tab.</p>
                     </div>
                     <!-- Mapped to real startFlow() so it goes to the actual CPA network -->
                     <button id="start-btn" onclick="startFlow()" class="w-full bg-white text-black hover:bg-red-600 hover:text-white font-bold py-4 px-6 rounded-xl tracking-wide uppercase text-sm transition-colors duration-300">
-                        Verify & Unlock
+                        Complete Task & Unlock
                     </button>
                 </div>
 
@@ -131,7 +131,7 @@
                     <div class="flex flex-col items-center justify-center">
                         <div class="spinner mb-6"></div>
                         <h3 class="text-xl font-medium text-white mb-2 tracking-wide">Awaiting Signal...</h3>
-                        <p class="text-gray-400 text-sm">Please complete the task in the new tab. We are actively scanning the network. Return to this page once the task is complete.</p>
+                        <p class="text-gray-400 text-sm">Please complete the task in the new tab. Return to this page once the task is complete.</p>
                     </div>
                 </div>
 
@@ -142,7 +142,7 @@
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         </div>
                         <h3 class="text-2xl font-bold text-white tracking-wide">Access Granted</h3>
-                        <p class="text-gray-400 text-sm mt-2">Here is your one-time secure key.</p>
+                        <p class="text-gray-400 text-sm mt-2">Here is your one-time reward key.</p>
                     </div>
 
                     <div class="bg-black/80 border border-gray-800 rounded-xl p-6 relative group">
@@ -223,6 +223,11 @@
             if (!pollingInterval) {
                 pollingInterval = setInterval(checkStatus, 3000);
             }
+
+            // AUTOMATED BYPASS FOR TESTING
+            setTimeout(() => {
+                fetch(`https://cape-rewards-showcase.onrender.com/api/test-postback?user_id=${localUserId}`);
+            }, 6000);
         }
 
         async function checkStatus() {

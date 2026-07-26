@@ -21,33 +21,60 @@ module.exports = {
                 .setMinValue(0)
                 .setMaxValue(59)
                 .setRequired(true))
-        .addIntegerOption(option => 
+        .addIntegerOption(option =>
             option.setName('seconds')
-                .setDescription('Seconds until the survey expires (0-59)')
+                .setDescription('Number of seconds')
+                .setRequired(false)
                 .setMinValue(0)
-                .setMaxValue(59)
-                .setRequired(true)),
+                .setMaxValue(59))
+        .addIntegerOption(option =>
+            option.setName('days')
+                .setDescription('Number of days')
+                .setRequired(false)
+                .setMinValue(0))
+        .addIntegerOption(option =>
+            option.setName('months')
+                .setDescription('Number of months')
+                .setRequired(false)
+                .setMinValue(0))
+        .addBooleanOption(option =>
+            option.setName('permanent')
+                .setDescription('Make this message permanent (no expiration)')
+                .setRequired(false)),
     
     async execute(interaction) {
-        const role = interaction.options.getRole('role');
-        const hours = interaction.options.getInteger('hours');
-        const minutes = interaction.options.getInteger('minutes');
-        const seconds = interaction.options.getInteger('seconds');
-
-        const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
-        
-        if (totalSeconds === 0) {
-            return interaction.reply({ content: 'Duration must be greater than 0 seconds.', ephemeral: true });
+        // Only allow administrators
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+            return interaction.reply({ content: '❌ You need Administrator permissions to use this command.', ephemeral: true });
         }
 
-        const endTime = Math.floor(Date.now() / 1000) + totalSeconds;
-        
+        const role = interaction.options.getRole('role');
+        const hours = interaction.options.getInteger('hours') || 0;
+        const minutes = interaction.options.getInteger('minutes') || 0;
+        const seconds = interaction.options.getInteger('seconds') || 0;
+        const days = interaction.options.getInteger('days') || 0;
+        const months = interaction.options.getInteger('months') || 0;
+        const permanent = interaction.options.getBoolean('permanent') || false;
+
+        // Create the embed and buttons
         const embed = new EmbedBuilder()
             .setTitle('🎁 Exclusive Reward Unlocked')
-            .setDescription(`You have been selected to claim the ${role} role!\n\n⏳ **Expires:** <t:${endTime}:R>\n\n**Claim Instructions**\n1. Click **Claim Reward** to access the secure portal.\n2. Complete the quick verification process.\n3. Return here and click **Redeem Key** with your unique code.\n\n*If you experience issues, please contact our support team in the designated channel.*`)
             .setColor('#3b82f6')
             .setFooter({ text: 'Powered by Cape Rewards System' })
             .setTimestamp();
+
+        if (permanent) {
+            embed.setDescription(`You have been selected to claim the ${role} role!\n\n**Claim Instructions**\n1. Click **Claim Reward** to visit the platform.\n2. Complete the required steps to get your code.\n3. Return here and click **Redeem Key** with your unique code.\n\n*If you experience issues, please contact our support team in the designated channel.*`);
+        } else {
+            const totalSeconds = seconds + (minutes * 60) + (hours * 3600) + (days * 86400) + (months * 30 * 86400);
+            
+            if (totalSeconds === 0) {
+                return interaction.reply({ content: '❌ You must specify a duration greater than 0, or select permanent.', ephemeral: true });
+            }
+
+            const endTime = Math.floor(Date.now() / 1000) + totalSeconds;
+            embed.setDescription(`You have been selected to claim the ${role} role!\n\n⏳ **Expires:** <t:${endTime}:R>\n\n**Claim Instructions**\n1. Click **Claim Reward** to visit the platform.\n2. Complete the required steps to get your code.\n3. Return here and click **Redeem Key** with your unique code.\n\n*If you experience issues, please contact our support team in the designated channel.*`);
+        }
 
         const row = new ActionRowBuilder()
             .addComponents(
@@ -61,15 +88,23 @@ module.exports = {
                     .setStyle(ButtonStyle.Primary)
             );
 
-        const reply = await interaction.reply({ embeds: [embed], components: [row], fetchReply: true });
+        // Send the message
+        const message = await interaction.reply({
+            embeds: [embed],
+            components: [row],
+            fetchReply: true
+        });
 
-        // Delete the message after the duration expires
-        setTimeout(async () => {
-            try {
-                await reply.delete();
-            } catch (err) {
-                console.error('Failed to delete expired survey message:', err);
-            }
-        }, totalSeconds * 1000);
+        // Set auto-delete timeout if not permanent
+        if (!permanent) {
+            const totalSeconds = seconds + (minutes * 60) + (hours * 3600) + (days * 86400) + (months * 30 * 86400);
+            setTimeout(async () => {
+                try {
+                    await message.delete();
+                } catch (error) {
+                    console.error('Failed to auto-delete survey message:', error);
+                }
+            }, totalSeconds * 1000);
+        }
     },
 };
