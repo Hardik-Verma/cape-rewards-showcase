@@ -63,13 +63,12 @@
         /* Sleek Glassmorphism */
         .glass-panel {
             background: #0a0a0a;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s ease;
+            border-radius: calc(1rem - 1px) !important;
+            position: relative;
+            z-index: 2;
         }
 
-        .glass-panel:hover {
-            border-color: rgba(220, 38, 38, 0.3); /* Subtle red accent on hover */
+        .glow-border:hover {
             transform: translateY(-5px);
         }
 
@@ -95,6 +94,7 @@
             box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.5);
             z-index: 1;
             background: rgba(255, 255, 255, 0.05); /* Subtle default border */
+            transition: all 0.3s ease;
         }
         .glow-border::before {
             content: "";
