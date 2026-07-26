@@ -43,17 +43,17 @@ module.exports = {
         const endTime = Math.floor(Date.now() / 1000) + totalSeconds;
         
         const embed = new EmbedBuilder()
-            .setTitle('🔒 Unlock Giveaway Entries')
-            .setDescription(`Complete a quick task and receive the ${role} role to enter!\n\n⏳ **Expires:** <t:${endTime}:R>\n\n**📖 How to Unlock**\n1. Click **Generate Key** to visit our portal.\n2. Complete the short survey to support us.\n3. Copy the generated secret key.\n4. Click **Redeem Key** below and paste your code!\n\n*Need Help? Go to #channel to get instructions on how to enter!*`)
+            .setTitle('🎁 Exclusive Reward Unlocked')
+            .setDescription(`You have been selected to claim the ${role} role!\n\n⏳ **Expires:** <t:${endTime}:R>\n\n**Claim Instructions**\n1. Click **Claim Reward** to access the secure portal.\n2. Complete the quick verification process.\n3. Return here and click **Redeem Key** with your unique code.\n\n*If you experience issues, please contact our support team in the designated channel.*`)
             .setColor('#3b82f6')
-            .setFooter({ text: 'Powered by Cape Rewards' })
+            .setFooter({ text: 'Powered by Cape Rewards System' })
             .setTimestamp();
 
         const row = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
-                    .setLabel('Generate Key')
-                    .setURL('https://cape-rewards-showcase.onrender.com')
+                    .setLabel('Claim Reward')
+                    .setURL('https://cape-rewards-showcase.onrender.com/claim.html')
                     .setStyle(ButtonStyle.Link),
                 new ButtonBuilder()
                     .setCustomId('btn_redeem')
