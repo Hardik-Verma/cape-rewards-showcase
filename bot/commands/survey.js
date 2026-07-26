@@ -28,7 +28,7 @@ module.exports = {
             .addComponents(
                 new ButtonBuilder()
                     .setLabel('Generate Key')
-                    .setURL('http://localhost:3000') // Placeholder for the actual web portal URL
+                    .setURL('https://cape-rewards-showcase.onrender.com')
                     .setStyle(ButtonStyle.Link),
                 new ButtonBuilder()
                     .setCustomId('btn_redeem')
