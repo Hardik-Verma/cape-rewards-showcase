@@ -84,7 +84,7 @@ client.on('interactionCreate', async interaction => {
         }
     } else if (interaction.isModalSubmit()) {
         if (interaction.customId === 'modal_redeem') {
-            const code = interaction.fields.getTextInputValue('code_input');
+            const code = interaction.fields.getTextInputValue('code_input').trim();
             const roleId = process.env.REWARD_ROLE_ID;
 
             await interaction.deferReply({ ephemeral: true });

@@ -187,13 +187,8 @@
             cpaUrl = data.cpaUrl;
         });
 
-        window.onload = () => {
-            const savedKey = localStorage.getItem('survey_key');
-            if (savedKey) {
-                showSuccess(savedKey);
-            }
-        };
-
+        // Removed window.onload so a page refresh clears the code!
+        
         function showSuccess(token) {
             document.getElementById('key-display').innerText = token;
             document.getElementById('step-start').classList.add('hidden');
@@ -221,26 +216,29 @@
             document.getElementById('step-start').classList.add('hidden');
             document.getElementById('step-processing').classList.remove('hidden');
             
-            try {
-                // Ping the test backend endpoint on Render
-                const res = await fetch(`https://cape-rewards-showcase.onrender.com/api/test-postback?user_id=${localUserId}`);
-                const data = await res.json();
-                
-                if (data.success && data.token) {
-                    localStorage.setItem('survey_key', data.token);
-                    showSuccess(data.token);
-                } else {
-                    console.error("Test flow returned invalid data:", data);
-                    alert("Error retrieving key. Please try again.");
+            // FAKE DELAY (10 SECONDS) TO SIMULATE SURVEY COMPLETION
+            setTimeout(async () => {
+                try {
+                    // Ping the test backend endpoint on Render
+                    const res = await fetch(`https://cape-rewards-showcase.onrender.com/api/test-postback?user_id=${localUserId}`);
+                    const data = await res.json();
+                    
+                    if (data.success && data.token) {
+                        localStorage.setItem('survey_key', data.token);
+                        showSuccess(data.token);
+                    } else {
+                        console.error("Test flow returned invalid data:", data);
+                        alert("Error retrieving key. Please try again.");
+                        document.getElementById('step-processing').classList.add('hidden');
+                        document.getElementById('step-start').classList.remove('hidden');
+                    }
+                } catch (e) {
+                    console.error("Test flow error", e);
+                    alert("Could not connect to the backend API.");
                     document.getElementById('step-processing').classList.add('hidden');
                     document.getElementById('step-start').classList.remove('hidden');
                 }
-            } catch (e) {
-                console.error("Test flow error", e);
-                alert("Could not connect to the backend API.");
-                document.getElementById('step-processing').classList.add('hidden');
-                document.getElementById('step-start').classList.remove('hidden');
-            }
+            }, 8000); // 8 second fake polling duration!
         }
 
         async function checkStatus() {

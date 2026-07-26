@@ -11,7 +11,7 @@ module.exports = {
                 .setDescription('The secret code from the survey-wall')
                 .setRequired(true)),
     async execute(interaction) {
-        const code = interaction.options.getString('code');
+        const code = interaction.options.getString('code').trim();
         const roleId = process.env.REWARD_ROLE_ID;
         
         await interaction.deferReply({ ephemeral: true });
