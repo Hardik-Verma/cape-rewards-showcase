@@ -120,8 +120,8 @@
                         <h2 class="text-2xl font-semibold text-white mb-2 tracking-wide">Verification Required</h2>
                         <p class="text-gray-400 text-sm">Proceed to the verification step below. Do not close this tab.</p>
                     </div>
-                    <!-- Mapped to testFlow() directly so the client can test the flow without a survey -->
-                    <button id="start-btn" onclick="testFlow()" class="w-full bg-white text-black hover:bg-red-600 hover:text-white font-bold py-4 px-6 rounded-xl tracking-wide uppercase text-sm transition-colors duration-300">
+                    <!-- Mapped to real startFlow() so it goes to the actual CPA network -->
+                    <button id="start-btn" onclick="startFlow()" class="w-full bg-white text-black hover:bg-red-600 hover:text-white font-bold py-4 px-6 rounded-xl tracking-wide uppercase text-sm transition-colors duration-300">
                         Verify & Unlock
                     </button>
                 </div>
@@ -131,7 +131,7 @@
                     <div class="flex flex-col items-center justify-center">
                         <div class="spinner mb-6"></div>
                         <h3 class="text-xl font-medium text-white mb-2 tracking-wide">Awaiting Signal...</h3>
-                        <p class="text-gray-400 text-sm">Please complete the task in the new tab. We are actively scanning the network.</p>
+                        <p class="text-gray-400 text-sm">Please complete the task in the new tab. We are actively scanning the network. Return to this page once the task is complete.</p>
                     </div>
                 </div>
 
@@ -223,35 +223,6 @@
             if (!pollingInterval) {
                 pollingInterval = setInterval(checkStatus, 3000);
             }
-        }
-
-        async function testFlow() {
-            document.getElementById('step-start').classList.add('hidden');
-            document.getElementById('step-processing').classList.remove('hidden');
-            
-            // FAKE DELAY (10 SECONDS) TO SIMULATE SURVEY COMPLETION
-            setTimeout(async () => {
-                try {
-                    // Ping the test backend endpoint on Render
-                    const res = await fetch(`https://cape-rewards-showcase.onrender.com/api/test-postback?user_id=${localUserId}`);
-                    const data = await res.json();
-                    
-                    if (data.success && data.token) {
-                        localStorage.setItem('survey_key', data.token);
-                        showSuccess(data.token);
-                    } else {
-                        console.error("Test flow returned invalid data:", data);
-                        alert("Error retrieving key. Please try again.");
-                        document.getElementById('step-processing').classList.add('hidden');
-                        document.getElementById('step-start').classList.remove('hidden');
-                    }
-                } catch (e) {
-                    console.error("Test flow error", e);
-                    alert("Could not connect to the backend API.");
-                    document.getElementById('step-processing').classList.add('hidden');
-                    document.getElementById('step-start').classList.remove('hidden');
-                }
-            }, 4000); // 4 second fake polling duration!
         }
 
         async function checkStatus() {
