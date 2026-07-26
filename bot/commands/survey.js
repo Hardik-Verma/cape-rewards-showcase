@@ -44,7 +44,7 @@ module.exports = {
     
     async execute(interaction) {
         // Only allow administrators
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
             return interaction.reply({ content: '❌ You need Administrator permissions to use this command.', ephemeral: true });
         }
 
@@ -59,8 +59,8 @@ module.exports = {
         // Create the embed and buttons
         const embed = new EmbedBuilder()
             .setTitle('🎁 Exclusive Reward Unlocked')
-            .setColor('#3b82f6')
-            .setFooter({ text: 'Powered by Cape Rewards System' })
+            .setColor('#dc2626') // Matching CAPEVERSE red
+            .setFooter({ text: 'CAPEVERSE | Automated Reward System' })
             .setTimestamp();
 
         if (permanent) {
