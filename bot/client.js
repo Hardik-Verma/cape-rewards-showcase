@@ -69,11 +69,11 @@ client.on('interactionCreate', async interaction => {
         if (interaction.customId === 'btn_redeem') {
             const modal = new ModalBuilder()
                 .setCustomId('modal_redeem')
-                .setTitle('Redeem Secret Key');
+                .setTitle('Verify Role Access');
 
             const codeInput = new TextInputBuilder()
                 .setCustomId('code_input')
-                .setLabel('Enter your secret key')
+                .setLabel('Enter your authorization code')
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true);
 
@@ -100,7 +100,7 @@ client.on('interactionCreate', async interaction => {
                 }
 
                 if (row.redeemed) {
-                    return interaction.editReply({ content: 'This code has already been redeemed.' });
+                    return interaction.editReply({ content: 'This code has already been verified.' });
                 }
 
                 try {
@@ -127,7 +127,7 @@ client.on('interactionCreate', async interaction => {
                             return interaction.editReply({ content: 'Role granted, but failed to mark code as used.' });
                         }
                         
-                        await interaction.editReply({ content: '✅ Code redeemed successfully! You have been granted the reward role.' });
+                        await interaction.editReply({ content: '✅ Code verified successfully! You have been granted the giveaway role.' });
                     });
 
                 } catch (discordErr) {

