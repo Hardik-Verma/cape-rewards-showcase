@@ -115,27 +115,27 @@
             <div class="flex items-center justify-between h-20">
                 <div class="flex-shrink-0 flex items-center">
                     <a href="/index.html" class="flex items-center gap-3 group">
-                        <img src="/logo.png" alt="Logo" class="h-8 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
-                        <span class="text-white font-semibold text-lg tracking-[0.15em] uppercase">CAPEVERSE</span>
+                        <img src="/logo.png" alt="Logo" class="h-6 opacity-80 group-hover:opacity-100 transition-opacity duration-300 grayscale group-hover:grayscale-0">
+                        <span class="text-white font-semibold text-sm tracking-[0.2em] uppercase">CAPEVERSE</span>
                     </a>
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-8">
-                        <a href="/index.html" class="relative group text-gray-400 hover:text-white px-2 py-2 text-xs font-bold transition-colors tracking-widest uppercase">
+                        <a href="/index.html" class="relative group text-white px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase">
                             Home
-                            <span class="absolute left-0 bottom-0 w-0 h-[2px] bg-red-600 transition-all duration-300 ease-out group-hover:w-full"></span>
+                            <span class="absolute left-0 bottom-0 w-full h-[1px] bg-red-600 transition-all duration-300 ease-out"></span>
                         </a>
-                        <a href="/about.html" class="relative group text-gray-400 hover:text-white px-2 py-2 text-xs font-bold transition-colors tracking-widest uppercase">
+                        <a href="/about.html" class="relative group text-gray-500 hover:text-white px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase">
                             About
-                            <span class="absolute left-0 bottom-0 w-0 h-[2px] bg-red-600 transition-all duration-300 ease-out group-hover:w-full"></span>
+                            <span class="absolute left-0 bottom-0 w-0 h-[1px] bg-red-600 transition-all duration-300 ease-out group-hover:w-full"></span>
                         </a>
-                        <a href="/claim.html" class="relative group text-gray-400 hover:text-white px-2 py-2 text-xs font-bold transition-colors tracking-widest uppercase">
+                        <a href="/claim.html" class="relative group text-gray-500 hover:text-white px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase">
                             Claim
-                            <span class="absolute left-0 bottom-0 w-0 h-[2px] bg-red-600 transition-all duration-300 ease-out group-hover:w-full"></span>
+                            <span class="absolute left-0 bottom-0 w-0 h-[1px] bg-red-600 transition-all duration-300 ease-out group-hover:w-full"></span>
                         </a>
-                        <a href="https://discord.com/channels/1511260578902052996/1519908293202677921" target="_blank" class="relative group text-gray-400 hover:text-white px-2 py-2 text-xs font-bold transition-colors tracking-widest uppercase">
+                        <a href="https://discord.com/channels/1511260578902052996/1519908293202677921" target="_blank" class="relative group text-gray-500 hover:text-white px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase">
                             Support
-                            <span class="absolute left-0 bottom-0 w-0 h-[2px] bg-red-600 transition-all duration-300 ease-out group-hover:w-full"></span>
+                            <span class="absolute left-0 bottom-0 w-0 h-[1px] bg-red-600 transition-all duration-300 ease-out group-hover:w-full"></span>
                         </a>
                     </div>
                 </div>
@@ -183,7 +183,7 @@
                 <div class="text-xs uppercase tracking-[0.4em] text-gray-400 mb-8">Scroll To Unlock</div>
                 
                 <!-- Dedicated Auto-Play Button -->
-                <button onclick="openAutoPlayModal()" class="mb-12 px-8 py-3 bg-red-600/20 border border-red-500/50 rounded-full text-xs font-bold uppercase tracking-widest text-white hover:bg-red-600 hover:border-red-600 transition-all shadow-[0_0_30px_rgba(255,0,0,0.3)] pointer-events-auto">
+                <button onclick="openAutoPlayModal()" class="mb-12 px-8 py-3 bg-white/5 border border-white/10 rounded-full text-xs font-bold uppercase tracking-widest text-white hover:bg-white/10 hover:border-red-500 transition-all pointer-events-auto">
                     Auto-Play Experience
                 </button>
                 
@@ -269,7 +269,7 @@
             <!-- 4. Final CTA (Fades in Center at the end) -->
             <div class="detail-panel panel-center" id="panel-cta">
                 <h2 class="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-8">Ready to Claim?</h2>
-                <a href="/claim.html" onclick="transitionToClaim(event)" class="inline-block bg-white text-black hover:bg-red-600 hover:text-white transition-colors duration-300 font-black py-5 px-12 rounded-xl tracking-widest uppercase text-sm shadow-[0_0_30px_rgba(255,0,0,0.2)]">
+                <a href="/claim.html" onclick="transitionToClaim(event)" class="inline-block bg-white text-black hover:bg-red-600 hover:text-white transition-colors duration-300 font-black py-5 px-12 rounded-xl tracking-widest uppercase text-sm">
                     Enter Verification
                 </a>
             </div>
@@ -311,20 +311,42 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="w-full py-12 border-t border-gray-900 bg-[#050505] relative z-20">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
-            <div class="mb-6 md:mb-0 text-center md:text-left flex items-center gap-4">
-                <img src="/logo.png" alt="Logo" class="h-8 opacity-80">
-                <div>
-                    <span class="text-white font-black text-lg tracking-[0.2em] uppercase">CAPEVERSE</span>
-                    <p class="text-gray-600 text-xs mt-1 leading-relaxed">&copy; 2026 CAPEVERSE. All rights reserved.<br>Protected by advanced anti-bypass security protocols.</p>
+    <!-- Professional Footer -->
+    <footer class="w-full py-16 border-t border-white/5 bg-[#030303] relative z-20 mt-auto">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+                
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center gap-3 mb-6">
+                        <img src="/logo.png" alt="Logo" class="h-6 grayscale opacity-50">
+                        <span class="text-white font-bold text-sm tracking-[0.2em] uppercase">CAPEVERSE</span>
+                    </div>
+                    <p class="text-gray-600 text-xs leading-relaxed max-w-sm mb-6">
+                        The premier platform for authenticated digital cosmetics. We pride ourselves on security, speed, and reliability.
+                    </p>
+                    <div class="text-gray-700 text-[10px] uppercase tracking-widest">
+                        &copy; 2026 CAPEVERSE. All Rights Reserved.
+                    </div>
                 </div>
-            </div>
-            <div class="flex space-x-8 text-xs tracking-widest uppercase font-semibold">
-                <a href="/index.html" class="text-gray-500 hover:text-white hover:text-red-500 transition-colors">Home</a>
-                <a href="/about.html" class="text-gray-500 hover:text-white hover:text-red-500 transition-colors">About</a>
-                <a href="https://discord.com/channels/1511260578902052996/1519908293202677921" target="_blank" class="text-gray-500 hover:text-white hover:text-red-500 transition-colors">Support</a>
+
+                <div>
+                    <h4 class="text-white font-bold text-xs tracking-widest uppercase mb-6">Platform</h4>
+                    <ul class="space-y-4 text-xs font-medium text-gray-500">
+                        <li><a href="/index.html" class="hover:text-red-500 transition-colors">Showcase</a></li>
+                        <li><a href="/about.html" class="hover:text-red-500 transition-colors">About Us</a></li>
+                        <li><a href="/claim.html" class="hover:text-red-500 transition-colors">Claim Portal</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold text-xs tracking-widest uppercase mb-6">Legal & Support</h4>
+                    <ul class="space-y-4 text-xs font-medium text-gray-500">
+                        <li><a href="https://discord.com/channels/1511260578902052996/1519908293202677921" target="_blank" class="hover:text-red-500 transition-colors">Support Center</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors cursor-default">Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors cursor-default">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
             </div>
         </div>
     </footer>
