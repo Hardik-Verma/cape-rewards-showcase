@@ -9,17 +9,42 @@ module.exports = {
             option.setName('role')
                 .setDescription('The role to advertise in the embed')
                 .setRequired(true))
-        .addStringOption(option => 
-            option.setName('duration')
-                .setDescription('Estimated time to complete (e.g. "2 minutes")')
+        .addIntegerOption(option => 
+            option.setName('hours')
+                .setDescription('Hours until the survey expires (0-24)')
+                .setMinValue(0)
+                .setMaxValue(24)
+                .setRequired(true))
+        .addIntegerOption(option => 
+            option.setName('minutes')
+                .setDescription('Minutes until the survey expires (0-59)')
+                .setMinValue(0)
+                .setMaxValue(59)
+                .setRequired(true))
+        .addIntegerOption(option => 
+            option.setName('seconds')
+                .setDescription('Seconds until the survey expires (0-59)')
+                .setMinValue(0)
+                .setMaxValue(59)
                 .setRequired(true)),
     
     async execute(interaction) {
         const role = interaction.options.getRole('role');
+        const hours = interaction.options.getInteger('hours');
+        const minutes = interaction.options.getInteger('minutes');
+        const seconds = interaction.options.getInteger('seconds');
+
+        const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+        
+        if (totalSeconds === 0) {
+            return interaction.reply({ content: 'Duration must be greater than 0 seconds.', ephemeral: true });
+        }
+
+        const endTime = Math.floor(Date.now() / 1000) + totalSeconds;
         
         const embed = new EmbedBuilder()
             .setTitle('🔒 Unlock Giveaway Entries')
-            .setDescription(`Complete a quick task and receive the ${role} role to enter!\n\n**📖 How to Unlock**\n1. Click **Generate Key** to visit our portal.\n2. Complete the short survey to support us.\n3. Copy the generated secret key.\n4. Click **Redeem Key** below and paste your code!\n\n*Need Help? Go to #channel to get instructions on how to enter!*`)
+            .setDescription(`Complete a quick task and receive the ${role} role to enter!\n\n⏳ **Expires:** <t:${endTime}:R>\n\n**📖 How to Unlock**\n1. Click **Generate Key** to visit our portal.\n2. Complete the short survey to support us.\n3. Copy the generated secret key.\n4. Click **Redeem Key** below and paste your code!\n\n*Need Help? Go to #channel to get instructions on how to enter!*`)
             .setColor('#3b82f6')
             .setFooter({ text: 'Powered by Cape Rewards' })
             .setTimestamp();
@@ -36,6 +61,15 @@ module.exports = {
                     .setStyle(ButtonStyle.Primary)
             );
 
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const reply = await interaction.reply({ embeds: [embed], components: [row], fetchReply: true });
+
+        // Delete the message after the duration expires
+        setTimeout(async () => {
+            try {
+                await reply.delete();
+            } catch (err) {
+                console.error('Failed to delete expired survey message:', err);
+            }
+        }, totalSeconds * 1000);
     },
 };
