@@ -22,13 +22,13 @@
         
         body { background-color: #000000; color: #ffffff; margin: 0; overflow-x: hidden; font-family: 'Inter', sans-serif; }
 
-        /* Highly Animated Live Background with CRAZY flashes */
+        /* Professional Animated Background */
         .bg-animated {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(45deg, #0a0000, #3a0000, #ff0000, #1a0000, #000000);
-            background-size: 600% 600%;
-            animation: gradientBG 5s ease infinite, intenseFlash 4s infinite;
+            background: linear-gradient(45deg, #050505, #111111, #1a1a1a, #111111, #050505);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
             z-index: -2;
         }
 
@@ -36,12 +36,6 @@
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
-        }
-
-        @keyframes intenseFlash {
-            0%, 90%, 94%, 98%, 100% { filter: brightness(0.6) contrast(1.2); }
-            92% { filter: brightness(2) contrast(1.5) hue-rotate(15deg); }
-            96% { filter: brightness(2.5) contrast(1.8) hue-rotate(-15deg); }
         }
 
         /* Fast Particle Overlay */

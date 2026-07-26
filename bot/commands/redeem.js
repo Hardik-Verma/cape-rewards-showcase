@@ -32,14 +32,22 @@ module.exports = {
 
             try {
                 const member = await interaction.guild.members.fetch(interaction.user.id);
-                const role = interaction.guild.roles.cache.get(roleId);
-
-                if (!role) {
-                    console.error(`Role with ID ${roleId} not found in guild.`);
-                    return interaction.editReply({ content: 'Reward role is not configured correctly on this server.' });
+                const roleIds = process.env.REWARD_ROLE_ID.split(',').map(id => id.trim());
+                
+                let successCount = 0;
+                for (const rId of roleIds) {
+                    if (!rId) continue;
+                    const role = interaction.guild.roles.cache.get(rId);
+                    if (role) {
+                        await member.roles.add(role).catch(err => console.error(`Failed to add role ${rId}`, err));
+                        successCount++;
+                    }
                 }
 
-                await member.roles.add(role);
+                if (successCount === 0) {
+                    console.error(`Roles not found in guild.`);
+                    return interaction.editReply({ content: 'Reward role is not configured correctly on this server.' });
+                }
 
                 db.run('UPDATE tokens SET redeemed = 1, user_id = ? WHERE token = ?', [interaction.user.id, code], async (updateErr) => {
                     if (updateErr) {
