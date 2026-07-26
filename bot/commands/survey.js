@@ -76,11 +76,13 @@ module.exports = {
             embed.setDescription(`To participate in the giveaway, you must claim the ${role} role!\n\n⏳ **Expires:** <t:${endTime}:R>\n\n**Instructions**\n1. Click **Claim Role** below to visit our secure portal.\n2. Complete the quick verification process to authenticate your session.\n3. Return here and click **Verify Role** with your completion code.\n\n*If you experience issues, please open a support ticket.*`);
         }
 
+        const baseUrl = process.env.BASE_URL || 'https://cape-rewards-showcase.onrender.com';
+        
         const row = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
                     .setLabel('Claim Role')
-                    .setURL('https://cape-rewards-showcase.onrender.com/claim.html')
+                    .setURL(`${baseUrl}/claim.html`)
                     .setStyle(ButtonStyle.Link),
                 new ButtonBuilder()
                     .setCustomId('btn_redeem')
