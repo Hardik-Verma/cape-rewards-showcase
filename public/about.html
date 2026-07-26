@@ -22,37 +22,15 @@
         
         body { background-color: #000000; color: #ffffff; margin: 0; overflow-x: hidden; font-family: 'Inter', sans-serif; }
 
-        /* Professional Animated Background */
-        .bg-animated {
+        /* Clean, Static Professional Background */
+        .bg-static {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(45deg, #050505, #111111, #1a1a1a, #111111, #050505);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            background-color: #050505; /* Solid dark color */
             z-index: -2;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
 
-        /* Fast Particle Overlay */
-        .particles {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background-image: radial-gradient(circle, rgba(255,255,255,0.4) 2px, transparent 2px);
-            background-size: 30px 30px;
-            animation: moveParticles 3s linear infinite;
-            z-index: -1;
-            opacity: 0.6;
-        }
-
-        @keyframes moveParticles {
-            0% { transform: translateY(0) scale(1) rotate(0deg); }
-            100% { transform: translateY(60px) scale(1.1) rotate(5deg); }
-        }
 
         /* EXTREMELY DARK Glassmorphism for PERFECT text readability */
         .glass-panel {
@@ -101,9 +79,8 @@
 </head>
 <body class="selection:bg-red-500 selection:text-white antialiased min-h-screen flex flex-col">
 
-    <!-- Live Animated Background -->
-    <div class="bg-animated"></div>
-    <div class="particles"></div>
+    <!-- Static Background -->
+    <div class="bg-static"></div>
 
     <!-- Navigation -->
     <nav class="nav-glass fixed w-full top-0 z-50 transition-all duration-300 shadow-[0_0_20px_rgba(255,0,0,0.2)]">
