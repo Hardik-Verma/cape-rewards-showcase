@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placeholder Survey | CAPEVERSE</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #030303; color: #ffffff; font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen">
+    <div class="text-center p-8 bg-[#0a0a0a] rounded-xl border border-white/10 max-w-md shadow-2xl">
+        <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10 animate-pulse">
+            <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <h1 class="text-2xl font-bold mb-2">Placeholder Survey</h1>
+        <p class="text-gray-400 mb-8 text-sm leading-relaxed">This is a simulated offerwall task designed for review purposes. In a live environment, this would be a real CPA task.</p>
+        <button onclick="completeTask()" class="bg-white text-black font-bold py-3 px-6 rounded-lg w-full hover:bg-red-600 hover:text-white transition-colors uppercase tracking-widest text-sm flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Complete & Return
+        </button>
+    </div>
+    <script>
+        function completeTask() {
+            // Set a flag in localStorage so claim.html knows to add points
+            localStorage.setItem('pending_reward', '150');
+            window.location.href = '/claim.html';
+        }
+    </script>
+</body>
+</html>
