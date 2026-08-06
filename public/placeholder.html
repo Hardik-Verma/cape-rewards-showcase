@@ -67,9 +67,12 @@
             btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Processing...';
             btn.classList.add('opacity-80', 'cursor-not-allowed');
             
+            const urlParams = new URLSearchParams(window.location.search);
+            const reward = urlParams.get('reward') || '150';
+            
             setTimeout(() => {
                 // Set flag and return
-                localStorage.setItem('pending_reward', '150');
+                localStorage.setItem('pending_reward', reward);
                 window.location.href = '/claim.html';
             }, 1000);
         }
