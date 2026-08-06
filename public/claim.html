@@ -273,6 +273,42 @@
     </footer>
 
     <script>
+        // --- AUTH LOGIC ---
+        const authToken = localStorage.getItem('auth_token');
+        if (!authToken) {
+            window.location.href = '/login.html';
+        }
+
+        let currentUser = null;
+        let generatedToken = null;
+
+        async function fetchUser() {
+            try {
+                const res = await fetch('/api/me', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    localStorage.removeItem('auth_token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                currentUser = data.user;
+                setBalance(currentUser.balance);
+                
+                // Now we can init offers since we have user ID
+                initOffers();
+
+                // Process placeholder returns if any
+                processPendingRewards();
+
+            } catch (e) {
+                console.error(e);
+                localStorage.removeItem('auth_token');
+                window.location.href = '/login.html';
+            }
+        }
+
         // --- ANTI-BYPASS & DEVTOOLS PROTECTION ---
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', function(e) {
@@ -304,17 +340,6 @@
 
         document.getElementById('currency-label').innerText = CONFIG.currencyName;
 
-        // --- CORE GATEWAY LOGIC ---
-        let localUserId = localStorage.getItem('local_user_id');
-        let balance = parseInt(localStorage.getItem('user_balance')) || 0;
-        let generatedToken = null;
-
-        if (!localUserId) {
-            localUserId = 'usr_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('local_user_id', localUserId);
-        }
-
-        // Generate Offers dynamically after fetching config
         const offersGrid = document.getElementById('offers-grid');
         
         async function initOffers() {
@@ -323,7 +348,7 @@
                 const res = await fetch('/api/config');
                 const data = await res.json();
                 if (data.cpaUrl && data.cpaUrl.trim() !== '') {
-                    offerLink = data.cpaUrl + localUserId;
+                    offerLink = data.cpaUrl + currentUser.id;
                 }
             } catch(e) {}
             
@@ -343,7 +368,6 @@
                 </a>
             `}).join('');
         }
-        initOffers();
 
         // Generate Cashout Rewards from CONFIG
         const rewardsList = document.getElementById('rewards-list');
@@ -361,42 +385,54 @@
         `).join('');
 
         let justProcessedPending = false;
-        // Handle returning from the placeholder survey
-        const pendingReward = localStorage.getItem('pending_reward');
-        if (pendingReward) {
-            justProcessedPending = true;
-            localStorage.removeItem('pending_reward');
-            const earnedPoints = parseInt(pendingReward);
-            setBalance(balance + earnedPoints); // Add points to existing balance!
-            alert(`Task completed successfully! You earned ${earnedPoints} ${CONFIG.currencyName}.`);
-            
-            // Secretly trigger the backend generation logic to prep a real token for cashout
-            fetch(`/api/test-postback?user_id=${localUserId}`).catch(e=>{});
-        } else {
-            setBalance(balance); // Initialize display to 0
+        
+        async function processPendingRewards() {
+            const pendingReward = localStorage.getItem('pending_reward');
+            if (pendingReward) {
+                justProcessedPending = true;
+                localStorage.removeItem('pending_reward');
+                const earnedPoints = parseInt(pendingReward);
+                
+                // Hit the backend to add the points officially
+                try {
+                    await fetch(`/api/test-postback?user_id=${currentUser.id}&reward=${earnedPoints}`);
+                    // Fetch updated balance
+                    const res = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${authToken}` } });
+                    const data = await res.json();
+                    if (data.success) {
+                        currentUser.balance = data.user.balance;
+                        setBalance(currentUser.balance);
+                    }
+                    alert(`Task completed successfully! You earned ${earnedPoints} ${CONFIG.currencyName}.`);
+                } catch(e) {}
+            }
         }
 
         // --- REAL BITCOTASKS POLLING ---
         // Constantly check the server to see if Bitcotasks sent a real postback
         let lastKnownToken = localStorage.getItem('survey_key');
         setInterval(async () => {
+            if (!currentUser) return;
             try {
-                const res = await fetch(`/api/check-status?user_id=${localUserId}`);
+                const res = await fetch(`/api/check-status?user_id=${currentUser.id}`);
                 const data = await res.json();
                 if (data.status === 'completed' && data.token) {
-                    // We found a token! Check if we already alerted the user
                     if (data.token !== lastKnownToken) {
                         lastKnownToken = data.token;
                         localStorage.setItem('survey_key', data.token);
                         generatedToken = data.token;
                         
-                        // Prevent double paying if we just came from placeholder
                         if (!justProcessedPending) {
-                            setBalance(balance + 150); // Add default payout for a real external bitcotasks survey
-                            alert(`Offer completed on partner site! Points added to your balance.`);
+                            // Re-fetch balance from server since it was updated via backend CPA webhook
+                            const meRes = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${authToken}` } });
+                            const meData = await meRes.json();
+                            if (meData.success) {
+                                currentUser.balance = meData.user.balance;
+                                setBalance(currentUser.balance);
+                                alert(`Offer completed on partner site! Points added to your balance.`);
+                            }
                         }
                     } else {
-                        // Already know about this token, just make sure it's available for cashout
                         generatedToken = data.token;
                     }
                 }
@@ -404,11 +440,9 @@
         }, 3000);
 
         function setBalance(amount) {
-            balance = amount;
-            localStorage.setItem('user_balance', balance);
-            document.getElementById('balance-display').innerHTML = `${balance} <span class="text-sm text-gray-500 uppercase">${CONFIG.currencyName}</span>`;
+            document.getElementById('balance-display').innerHTML = `${amount} <span class="text-sm text-gray-500 uppercase">${CONFIG.currencyName}</span>`;
             const cashoutBtn = document.getElementById('cashout-btn');
-            if (balance >= CONFIG.cashoutThreshold) {
+            if (amount >= CONFIG.cashoutThreshold) {
                 cashoutBtn.disabled = false;
                 cashoutBtn.classList.remove('bg-white/10', 'text-gray-500', 'cursor-not-allowed');
                 cashoutBtn.classList.add('bg-white', 'text-black', 'hover:bg-red-600', 'hover:text-white');
@@ -420,7 +454,7 @@
         }
 
         function openCashoutModal() {
-            if(balance >= CONFIG.cashoutThreshold) {
+            if(currentUser && currentUser.balance >= CONFIG.cashoutThreshold) {
                 document.getElementById('cashout-modal').classList.remove('hidden');
                 document.getElementById('cashout-modal').classList.add('flex');
             }
@@ -436,30 +470,35 @@
             document.getElementById('success-modal').classList.remove('flex');
         }
 
-        function redeemReward(rewardId, cost, rewardName) {
-            if(balance < cost) return alert("Not enough points!");
+        async function redeemReward(rewardId, cost, rewardName) {
+            if(currentUser.balance < cost) return alert("Not enough points!");
             
             closeCashoutModal();
-            setBalance(0); // Deduct balance to 0 as requested by client
-
             
-            // Use pre-fetched generated token from the background test-postback, or fallback.
-            let tokenToShow = generatedToken || localStorage.getItem('survey_key') || 'GEN-ERR-TEMP-TOKEN';
-            document.getElementById('key-display').innerText = tokenToShow;
-            
-            // Save to order history with advanced fields
-            let history = JSON.parse(localStorage.getItem('order_history') || '[]');
-            history.unshift({ 
-                name: rewardName, 
-                token: tokenToShow, 
-                date: new Date().toLocaleDateString(),
-                timestamp: Date.now(),
-                points: cost
-            });
-            localStorage.setItem('order_history', JSON.stringify(history));
-            
-            document.getElementById('success-modal').classList.remove('hidden');
-            document.getElementById('success-modal').classList.add('flex');
+            try {
+                const res = await fetch('/api/cashout', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ rewardId, cost, rewardName })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    setBalance(0); // Frontend update
+                    currentUser.balance = 0;
+                    document.getElementById('key-display').innerText = data.token;
+                    document.getElementById('success-modal').classList.remove('hidden');
+                    document.getElementById('success-modal').classList.add('flex');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch(e) {
+                alert('Network error during cashout. Please try again.');
+            }
         }
 
         function copyKey() {
@@ -470,6 +509,8 @@
         }
     
         document.addEventListener('DOMContentLoaded', () => {
+            fetchUser(); // START AUTH FLOW
+
             const mobileBtn = document.getElementById('mobile-menu-btn');
             const mobileMenu = document.getElementById('mobile-menu');
             if (mobileBtn && mobileMenu) {
@@ -478,6 +519,11 @@
                 });
             }
         });
+        
+        function logout() {
+            localStorage.removeItem('auth_token');
+            window.location.href = '/login.html';
+        }
     </script>
 </body>
 </html>
