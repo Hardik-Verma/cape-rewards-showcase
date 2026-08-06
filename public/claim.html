@@ -306,7 +306,7 @@
 
         // --- CORE GATEWAY LOGIC ---
         let localUserId = localStorage.getItem('local_user_id');
-        let balance = 0;
+        let balance = parseInt(localStorage.getItem('user_balance')) || 0;
         let generatedToken = null;
 
         if (!localUserId) {
@@ -405,6 +405,7 @@
 
         function setBalance(amount) {
             balance = amount;
+            localStorage.setItem('user_balance', balance);
             document.getElementById('balance-display').innerHTML = `${balance} <span class="text-sm text-gray-500 uppercase">${CONFIG.currencyName}</span>`;
             const cashoutBtn = document.getElementById('cashout-btn');
             if (balance >= CONFIG.cashoutThreshold) {
