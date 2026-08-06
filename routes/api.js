@@ -6,16 +6,17 @@ const db = require('../database/db');
 // Secure config for frontend
 router.get('/config', (req, res) => {
     res.json({
-        cpaUrl: process.env.CPA_NETWORK_URL || 'https://example-survey-network.com/offer?uid='
+        cpaUrl: process.env.BITCOTASKS_URL || ''
     });
 });
 
 // Postback URL for the CPA network to hit when a user completes a survey
-// Format: /api/postback?user_id=123&secret=your_postback_secret_here
+// Format: /api/postback?user_id={subid}&secret=YOUR_SECRET
 router.get('/postback', (req, res) => {
     const { user_id, secret } = req.query;
 
-    if (secret !== process.env.POSTBACK_SECRET) {
+    const expectedSecret = process.env.BITCOTASKS_SECRET;
+    if (expectedSecret && secret !== expectedSecret) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
