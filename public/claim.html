@@ -343,7 +343,7 @@
             offersGrid.innerHTML = CONFIG.offers.map(o => {
                 const finalLink = offerLink.includes('?') ? `${offerLink}&reward=${o.reward}` : `${offerLink}?reward=${o.reward}`;
                 return `
-                <a href="${finalLink}" onclick="setBalance(0)" class="bg-[#0a0a0a] border border-white/5 hover:border-red-500/50 rounded-xl p-4 cursor-pointer transition-all hover:bg-white/5 text-center flex flex-col items-center gap-2 group block">
+                <a href="${finalLink}" class="bg-[#0a0a0a] border border-white/5 hover:border-red-500/50 rounded-xl p-4 cursor-pointer transition-all hover:bg-white/5 text-center flex flex-col items-center gap-2 group block">
                     <div class="text-[10px] text-gray-500 font-semibold flex items-center gap-1 uppercase tracking-widest">
                         <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         ${o.time}
@@ -380,7 +380,7 @@
             justProcessedPending = true;
             localStorage.removeItem('pending_reward');
             const earnedPoints = parseInt(pendingReward);
-            setBalance(earnedPoints); // Just set to the earned points
+            setBalance(balance + earnedPoints); // Add points to existing balance!
             alert(`Task completed successfully! You earned ${earnedPoints} ${CONFIG.currencyName}.`);
             
             // Secretly trigger the backend generation logic to prep a real token for cashout
@@ -405,7 +405,7 @@
                         
                         // Prevent double paying if we just came from placeholder
                         if (!justProcessedPending) {
-                            setBalance(150); // Default payout for a real external bitcotasks survey
+                            setBalance(balance + 150); // Add default payout for a real external bitcotasks survey
                             alert(`Offer completed on partner site! Points added to your balance.`);
                         }
                     } else {
