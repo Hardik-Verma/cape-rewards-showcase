@@ -3,30 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Placeholder Survey | CAPEVERSE</title>
+    <title>Bitcotasks | Partner Offerwall</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #030303; color: #ffffff; font-family: 'Inter', sans-serif; }
+        body { background-color: #f8fafc; color: #0f172a; font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen">
-    <div class="text-center p-8 bg-[#0a0a0a] rounded-xl border border-white/10 max-w-md shadow-2xl">
-        <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10 animate-pulse">
-            <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+<body class="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+    <!-- Fake Partner Header -->
+    <div class="fixed top-0 w-full bg-white shadow-sm border-b border-gray-200 p-4 flex justify-between items-center z-50">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold">B</div>
+            <span class="font-bold text-gray-800 tracking-tight">BitcoTasks Partner Network</span>
         </div>
-        <h1 class="text-2xl font-bold mb-2">Placeholder Survey</h1>
-        <p class="text-gray-400 mb-8 text-sm leading-relaxed">This is a simulated offerwall task designed for review purposes. In a live environment, this would be a real CPA task.</p>
-        <button onclick="completeTask()" class="bg-white text-black font-bold py-3 px-6 rounded-lg w-full hover:bg-red-600 hover:text-white transition-colors uppercase tracking-widest text-sm flex items-center justify-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            Complete & Return
-        </button>
+        <div class="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+            Secure Connection
+        </div>
     </div>
+
+    <!-- Survey Content -->
+    <div class="text-center p-10 bg-white rounded-2xl border border-gray-200 max-w-lg shadow-xl relative overflow-hidden mt-16 w-full mx-4">
+        <div class="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
+        
+        <div id="loading-state">
+            <div class="w-16 h-16 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <h1 class="text-2xl font-bold mb-3 text-gray-800">Finding the best survey...</h1>
+            <p class="text-gray-500 mb-2 text-sm">Matching your profile with our advertising partners.</p>
+            <p class="text-gray-400 text-xs uppercase tracking-widest">Please wait a moment</p>
+        </div>
+
+        <div id="survey-state" class="hidden">
+            <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+            </div>
+            <h1 class="text-2xl font-bold mb-3 text-gray-800">Consumer Opinion Survey</h1>
+            <p class="text-gray-500 mb-8 text-sm">Takes approximately 2-5 minutes. Complete this quick survey to unlock your reward instantly.</p>
+            
+            <button onclick="simulateCompletion()" class="bg-blue-600 text-white font-bold py-4 px-8 rounded-xl w-full hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2">
+                Continue to Survey
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+            <button onclick="window.history.back()" class="mt-4 text-gray-400 text-sm hover:text-gray-600">Cancel and return</button>
+        </div>
+    </div>
+    
+    <div class="mt-8 text-xs text-gray-400 flex items-center justify-center gap-6">
+        <span>Privacy Policy</span>
+        <span>Terms of Service</span>
+        <span>Support</span>
+    </div>
+
     <script>
-        function completeTask() {
-            // Set a flag in localStorage so claim.html knows to add points
-            localStorage.setItem('pending_reward', '150');
-            window.location.href = '/claim.html';
+        // Simulate loading a real survey page
+        setTimeout(() => {
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('survey-state').classList.remove('hidden');
+        }, 1500);
+
+        function simulateCompletion() {
+            // Button changes to loading state
+            const btn = document.querySelector('button');
+            btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Processing...';
+            btn.classList.add('opacity-80', 'cursor-not-allowed');
+            
+            setTimeout(() => {
+                // Set flag and return
+                localStorage.setItem('pending_reward', '150');
+                window.location.href = '/claim.html';
+            }, 1000);
         }
     </script>
 </body>
