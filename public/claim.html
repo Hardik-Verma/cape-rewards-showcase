@@ -171,7 +171,10 @@
                         <span class="text-gray-400 uppercase tracking-widest text-xs font-bold">Balance</span>
                         <span class="text-emerald-400 font-black text-xl" id="balance-display">0 <span class="text-sm text-gray-500 uppercase" id="currency-label">PTS</span></span>
                     </div>
-                    <div class="flex justify-end items-center">
+                    <div class="flex justify-end items-center gap-2">
+                        <button onclick="openHistoryModal()" title="Order History" class="bg-white/5 text-gray-400 hover:text-white py-3 px-4 rounded-xl transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </button>
                         <button id="cashout-btn" onclick="openCashoutModal()" class="bg-white/10 text-gray-500 cursor-not-allowed font-bold py-3 px-6 rounded-xl tracking-wide uppercase text-xs transition-colors duration-300 flex items-center w-full justify-center" disabled>
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg> Cashout
                         </button>
@@ -204,6 +207,7 @@
         <div id="success-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm">
             <div class="glow-border w-full max-w-md mx-4">
                 <div class="glass-panel w-full rounded-2xl p-8 relative text-center">
+                    <button onclick="closeSuccessModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                     <div class="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/50">
                         <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     </div>
@@ -217,6 +221,19 @@
                         </button>
                     </div>
                     <p class="text-[0.6rem] text-gray-500 uppercase tracking-widest">Return to Discord and use /redeem</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- History Modal -->
+        <div id="history-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm">
+            <div class="glow-border w-full max-w-md mx-4">
+                <div class="glass-panel w-full rounded-2xl p-8 relative">
+                    <button onclick="closeHistoryModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                    <h3 class="text-xl font-black text-white mb-6 uppercase tracking-widest text-center">Order History</h3>
+                    <div class="space-y-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar" id="history-list">
+                        <!-- Rendered by JS -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -282,19 +299,19 @@
             currencyName: "Points",
             cashoutThreshold: 0,
             rewards: [
-                { id: 'classic', name: 'Classic Woven Cape', type: 'Digital Cosmetic', cost: 150 },
-                { id: 'moonlight', name: 'Moonlight Veil Cape', type: 'Digital Cosmetic', cost: 150 },
-                { id: 'crafter', name: 'The Crafter Cape', type: 'Digital Cosmetic', cost: 150 }
+                { id: 'giveaway', name: 'Capeverse Giveaway Entry', type: 'Digital Cosmetic', cost: 50, image: '/logo.png' },
+                { id: 'moonlight', name: 'Moonlight Trail Cape', type: 'Digital Cosmetic', cost: 1000, image: '/moonlgihta.webp' },
+                { id: 'crafter', name: 'Crafter Cape', type: 'Digital Cosmetic', cost: 1500, image: '/imagecarfter.webp' }
             ],
             offers: [
-                { time: "5 min", reward: 150, stars: 4.5 },
-                { time: "10 min", reward: 150, stars: 4.8 },
-                { time: "3 min", reward: 150, stars: 3.9 },
-                { time: "15 min", reward: 150, stars: 4.2 },
-                { time: "2 min", reward: 150, stars: 4.9 },
-                { time: "8 min", reward: 150, stars: 4.1 },
-                { time: "12 min", reward: 150, stars: 4.7 },
-                { time: "4 min", reward: 150, stars: 4.3 }
+                { time: "5 min", reward: 3, stars: 4.5 },
+                { time: "10 min", reward: 8, stars: 4.8 },
+                { time: "3 min", reward: 1, stars: 3.9 },
+                { time: "15 min", reward: 10, stars: 4.2 },
+                { time: "2 min", reward: 2, stars: 4.9 },
+                { time: "8 min", reward: 5, stars: 4.1 },
+                { time: "12 min", reward: 9, stars: 4.7 },
+                { time: "4 min", reward: 4, stars: 4.3 }
             ]
         };
 
@@ -342,9 +359,9 @@
         // Generate Cashout Rewards from CONFIG
         const rewardsList = document.getElementById('rewards-list');
         rewardsList.innerHTML = CONFIG.rewards.map(r => `
-            <button onclick="redeemReward('${r.id}', ${r.cost})" class="w-full flex items-center justify-between bg-black/50 border border-white/10 hover:border-red-500 p-4 rounded-xl transition-colors group">
+            <button onclick="redeemReward('${r.id}', ${r.cost}, '${r.name}')" class="w-full flex items-center justify-between bg-black/50 border border-white/10 hover:border-red-500 p-4 rounded-xl transition-colors group">
                 <div class="flex items-center gap-4">
-                    <img src="/logo.png" class="w-10 h-10 object-contain group-hover:scale-110 transition-transform">
+                    <img src="${r.image}" class="w-10 h-10 object-contain group-hover:scale-110 transition-transform">
                     <div class="text-left">
                         <div class="text-white font-bold text-sm">${r.name}</div>
                         <div class="text-gray-500 text-[10px] uppercase tracking-widest">${r.type}</div>
@@ -420,16 +437,52 @@
             document.getElementById('cashout-modal').classList.remove('flex');
         }
 
-        function redeemReward(rewardId, cost) {
-            if(balance < cost && balance < 150) return alert("Not enough points!");
+        function closeSuccessModal() {
+            document.getElementById('success-modal').classList.add('hidden');
+            document.getElementById('success-modal').classList.remove('flex');
+        }
+
+        function openHistoryModal() {
+            const historyList = document.getElementById('history-list');
+            const history = JSON.parse(localStorage.getItem('order_history') || '[]');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">No recent orders found.</div>';
+            } else {
+                historyList.innerHTML = history.map(item => `
+                    <div class="bg-black/50 border border-white/10 p-4 rounded-xl flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white font-bold text-sm">${item.name}</span>
+                            <span class="text-xs text-gray-500">${item.date}</span>
+                        </div>
+                        <code class="text-emerald-400 font-mono text-xs select-all bg-emerald-500/10 p-2 rounded">${item.token}</code>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('history-modal').classList.remove('hidden');
+            document.getElementById('history-modal').classList.add('flex');
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('history-modal').classList.add('hidden');
+            document.getElementById('history-modal').classList.remove('flex');
+        }
+
+        function redeemReward(rewardId, cost, rewardName) {
+            if(balance < cost) return alert("Not enough points!");
             
             closeCashoutModal();
-            // setBalance(balance - cost); // Disabled to allow unlimited cashouts per user request
-
+            setBalance(balance - cost); // Deduct balance
             
             // Use pre-fetched generated token from the background test-postback, or fallback.
             let tokenToShow = generatedToken || localStorage.getItem('survey_key') || 'GEN-ERR-TEMP-TOKEN';
             document.getElementById('key-display').innerText = tokenToShow;
+            
+            // Save to order history
+            let history = JSON.parse(localStorage.getItem('order_history') || '[]');
+            history.unshift({ name: rewardName, token: tokenToShow, date: new Date().toLocaleDateString() });
+            localStorage.setItem('order_history', JSON.stringify(history));
             
             document.getElementById('success-modal').classList.remove('hidden');
             document.getElementById('success-modal').classList.add('flex');
