@@ -172,9 +172,9 @@
                         <span class="text-emerald-400 font-black text-xl" id="balance-display">0 <span class="text-sm text-gray-500 uppercase" id="currency-label">PTS</span></span>
                     </div>
                     <div class="flex justify-end items-center gap-2">
-                        <button onclick="openHistoryModal()" title="Order History" class="bg-white/5 text-gray-400 hover:text-white py-3 px-4 rounded-xl transition-colors">
+                        <a href="/history.html" title="Order History" class="bg-white/5 text-gray-400 hover:text-white py-3 px-4 rounded-xl transition-colors block">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        </button>
+                        </a>
                         <button id="cashout-btn" onclick="openCashoutModal()" class="bg-white/10 text-gray-500 cursor-not-allowed font-bold py-3 px-6 rounded-xl tracking-wide uppercase text-xs transition-colors duration-300 flex items-center w-full justify-center" disabled>
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg> Cashout
                         </button>
@@ -221,19 +221,6 @@
                         </button>
                     </div>
                     <p class="text-[0.6rem] text-gray-500 uppercase tracking-widest">Return to Discord and use /redeem</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- History Modal -->
-        <div id="history-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm">
-            <div class="glow-border w-full max-w-md mx-4">
-                <div class="glass-panel w-full rounded-2xl p-8 relative">
-                    <button onclick="closeHistoryModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                    <h3 class="text-xl font-black text-white mb-6 uppercase tracking-widest text-center">Order History</h3>
-                    <div class="space-y-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar" id="history-list">
-                        <!-- Rendered by JS -->
-                    </div>
                 </div>
             </div>
         </div>
@@ -448,33 +435,6 @@
             document.getElementById('success-modal').classList.remove('flex');
         }
 
-        function openHistoryModal() {
-            const historyList = document.getElementById('history-list');
-            const history = JSON.parse(localStorage.getItem('order_history') || '[]');
-            
-            if (history.length === 0) {
-                historyList.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">No recent orders found.</div>';
-            } else {
-                historyList.innerHTML = history.map(item => `
-                    <div class="bg-black/50 border border-white/10 p-4 rounded-xl flex flex-col gap-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-white font-bold text-sm">${item.name}</span>
-                            <span class="text-xs text-gray-500">${item.date}</span>
-                        </div>
-                        <code class="text-emerald-400 font-mono text-xs select-all bg-emerald-500/10 p-2 rounded">${item.token}</code>
-                    </div>
-                `).join('');
-            }
-            
-            document.getElementById('history-modal').classList.remove('hidden');
-            document.getElementById('history-modal').classList.add('flex');
-        }
-
-        function closeHistoryModal() {
-            document.getElementById('history-modal').classList.add('hidden');
-            document.getElementById('history-modal').classList.remove('flex');
-        }
-
         function redeemReward(rewardId, cost, rewardName) {
             if(balance < cost) return alert("Not enough points!");
             
@@ -486,9 +446,15 @@
             let tokenToShow = generatedToken || localStorage.getItem('survey_key') || 'GEN-ERR-TEMP-TOKEN';
             document.getElementById('key-display').innerText = tokenToShow;
             
-            // Save to order history
+            // Save to order history with advanced fields
             let history = JSON.parse(localStorage.getItem('order_history') || '[]');
-            history.unshift({ name: rewardName, token: tokenToShow, date: new Date().toLocaleDateString() });
+            history.unshift({ 
+                name: rewardName, 
+                token: tokenToShow, 
+                date: new Date().toLocaleDateString(),
+                timestamp: Date.now(),
+                points: cost
+            });
             localStorage.setItem('order_history', JSON.stringify(history));
             
             document.getElementById('success-modal').classList.remove('hidden');
