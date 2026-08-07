@@ -3,7 +3,7 @@ const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const db = require('../database/db');
+const { User, Item, VerificationCode, Order } = require('../database/db');
 const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 
@@ -32,13 +32,16 @@ function authenticateToken(req, res, next) {
     const token = authHeader && authHeader.split(' ')[1];
     if (token == null) return res.status(401).json({ error: 'Unauthorized' });
 
-    jwt.verify(token, JWT_SECRET, (err, user) => {
+    jwt.verify(token, JWT_SECRET, async (err, userPayload) => {
         if (err) return res.status(403).json({ error: 'Forbidden' });
-        db.get('SELECT banned FROM users WHERE id = ?', [user.id], (err, row) => {
-            if (err || !row || row.banned) return res.status(403).json({ error: 'You are banned.' });
-            req.user = user;
+        try {
+            const userFound = await User.findById(userPayload.id);
+            if (!userFound || userFound.banned) return res.status(403).json({ error: 'You are banned.' });
+            req.user = { id: userFound.id, username: userFound.username, role: userFound.role };
             next();
-        });
+        } catch (e) {
+            return res.status(500).json({ error: 'Database error' });
+        }
     });
 }
 
@@ -63,41 +66,42 @@ router.post('/auth/google', async (req, res) => {
         const googleId = payload['sub'];
         const name = payload['name'];
 
-        db.get('SELECT * FROM users WHERE google_id = ? OR email = ?', [googleId, email], (err, user) => {
-            if (user) {
-                if (user.banned) return res.status(403).json({ error: 'Account banned' });
-                // If exists but no google_id (linked by email), update it
-                if (!user.google_id) {
-                    db.run('UPDATE users SET google_id = ?, is_verified = 1 WHERE id = ?', [googleId, user.id]);
-                }
-                const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-                return res.json({ success: true, token, role: user.role });
-            } else {
-                // Register new Google user
-                let username = name.replace(/\s+/g, '').toLowerCase() + Math.floor(Math.random() * 1000);
-                db.run('INSERT INTO users (username, email, google_id, is_verified) VALUES (?, ?, ?, 1)', 
-                    [username, email, googleId], function(err) {
-                    if (err) return res.status(500).json({ error: 'Database error' });
-                    const token = jwt.sign({ id: this.lastID, username, role: 'user' }, JWT_SECRET, { expiresIn: '7d' });
-                    res.json({ success: true, token, role: 'user' });
-                });
+        let user = await User.findOne({ $or: [{ google_id: googleId }, { email: email }] });
+        
+        if (user) {
+            if (user.banned) return res.status(403).json({ error: 'Account banned' });
+            if (!user.google_id) {
+                user.google_id = googleId;
+                user.is_verified = true;
+                await user.save();
             }
-        });
+            const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+            return res.json({ success: true, token, role: user.role });
+        } else {
+            let username = name.replace(/\s+/g, '').toLowerCase() + Math.floor(Math.random() * 1000);
+            user = await User.create({ username, email, google_id: googleId, is_verified: true });
+            const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+            res.json({ success: true, token, role: user.role });
+        }
     } catch (e) {
         res.status(400).json({ error: 'Invalid Google token' });
     }
 });
 
-router.post('/auth/send-otp', (req, res) => {
+router.post('/auth/send-otp', async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'Email required' });
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
 
-    db.run('INSERT OR REPLACE INTO verification_codes (email, code, expires_at) VALUES (?, ?, ?)', [email, code, expires.toISOString()], err => {
-        if (err) return res.status(500).json({ error: 'Database error' });
-        
+    try {
+        await VerificationCode.findOneAndUpdate(
+            { email },
+            { code, expires_at: expires },
+            { upsert: true, new: true }
+        );
+
         if (!process.env.SMTP_EMAIL) {
             console.log(`[MOCK EMAIL] OTP for ${email} is ${code}`);
             return res.json({ success: true, message: 'Check console for mock OTP' });
@@ -112,37 +116,41 @@ router.post('/auth/send-otp', (req, res) => {
             if (error) return res.status(500).json({ error: 'Failed to send email' });
             res.json({ success: true, message: 'OTP sent' });
         });
-    });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
 router.post('/register', async (req, res) => {
     const { username, email, password, otp } = req.body;
     if (!username || !email || !password || !otp) return res.status(400).json({ error: 'All fields required' });
 
-    db.get('SELECT code, expires_at FROM verification_codes WHERE email = ?', [email], async (err, row) => {
+    try {
+        const row = await VerificationCode.findOne({ email });
         if (!row || row.code !== otp || new Date(row.expires_at) < new Date()) {
             return res.status(400).json({ error: 'Invalid or expired OTP' });
         }
 
+        const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+        if (existingUser) return res.status(400).json({ error: 'Username or email already exists' });
+
         const hashedPassword = await bcrypt.hash(password, 10);
-        db.run('INSERT INTO users (username, email, password_hash, is_verified) VALUES (?, ?, ?, 1)', 
-            [username, email, hashedPassword], function(err) {
-            if (err) {
-                if (err.code === 'SQLITE_CONSTRAINT') return res.status(400).json({ error: 'Username or email already exists' });
-                return res.status(500).json({ error: 'Database error' });
-            }
-            db.run('DELETE FROM verification_codes WHERE email = ?', [email]);
-            res.status(201).json({ success: true, message: 'User registered' });
-        });
-    });
+        await User.create({ username, email, password_hash: hashedPassword, is_verified: true });
+        await VerificationCode.deleteOne({ email });
+        
+        res.status(201).json({ success: true, message: 'User registered' });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
-router.post('/login', (req, res) => {
-    const { identifier, password } = req.body; // Can be username or email
+router.post('/login', async (req, res) => {
+    const { identifier, password } = req.body;
     if (!identifier || !password) return res.status(400).json({ error: 'Credentials required' });
 
-    db.get('SELECT * FROM users WHERE username = ? OR email = ?', [identifier, identifier], async (err, user) => {
-        if (err || !user) return res.status(400).json({ error: 'Invalid credentials' });
+    try {
+        const user = await User.findOne({ $or: [{ username: identifier }, { email: identifier }] });
+        if (!user) return res.status(400).json({ error: 'Invalid credentials' });
         if (user.banned) return res.status(403).json({ error: 'Account banned' });
         if (!user.password_hash) return res.status(400).json({ error: 'Please login with Google' });
 
@@ -151,37 +159,49 @@ router.post('/login', (req, res) => {
 
         const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
         res.json({ success: true, token, role: user.role });
-    });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
-router.get('/me', authenticateToken, (req, res) => {
-    db.get('SELECT id, username, email, balance, role FROM users WHERE id = ?', [req.user.id], (err, user) => {
-        if (err || !user) return res.status(404).json({ error: 'User not found' });
-        res.json({ success: true, user });
-    });
+router.get('/me', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('id username email balance role');
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.json({ success: true, user: { id: user.id, username: user.username, email: user.email, balance: user.balance, role: user.role } });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
 // --- ITEMS (PUBLIC & ADMIN) ---
 
-router.get('/items', (req, res) => {
-    db.all('SELECT * FROM items', (err, rows) => {
-        res.json({ success: true, items: rows || [] });
-    });
+router.get('/items', async (req, res) => {
+    try {
+        const items = await Item.find({});
+        res.json({ success: true, items });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
-router.post('/admin/items', authenticateAdmin, (req, res) => {
+router.post('/admin/items', authenticateAdmin, async (req, res) => {
     const { id, name, type, cost, image, stock } = req.body;
-    db.run('INSERT OR REPLACE INTO items (id, name, type, cost, image, stock) VALUES (?, ?, ?, ?, ?, ?)', 
-        [id, name, type, cost, image, stock], err => {
-        if (err) return res.status(500).json({ error: 'Database error' });
+    try {
+        await Item.findOneAndUpdate({ id }, { name, type, cost, image, stock }, { upsert: true });
         res.json({ success: true });
-    });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
-router.delete('/admin/items/:id', authenticateAdmin, (req, res) => {
-    db.run('DELETE FROM items WHERE id = ?', [req.params.id], err => {
-        res.json({ success: !err });
-    });
+router.delete('/admin/items/:id', authenticateAdmin, async (req, res) => {
+    try {
+        await Item.deleteOne({ id: req.params.id });
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
 router.post('/admin/upload', authenticateAdmin, async (req, res) => {
@@ -215,116 +235,122 @@ router.post('/admin/upload', authenticateAdmin, async (req, res) => {
 
 // --- CASHOUT & HISTORY ENDPOINTS ---
 
-router.post('/cashout', authenticateToken, (req, res) => {
+router.post('/cashout', authenticateToken, async (req, res) => {
     const { rewardId } = req.body;
     
-    db.serialize(() => {
-        db.get('SELECT balance FROM users WHERE id = ?', [req.user.id], (err, user) => {
-            if (err || !user) return res.status(404).json({ error: 'User not found' });
-            
-            db.get('SELECT * FROM items WHERE id = ?', [rewardId], (err, item) => {
-                if (err || !item) return res.status(400).json({ error: 'Invalid item' });
-                
-                if (item.stock === 0) return res.status(400).json({ error: 'Out of stock' });
-                if (user.balance < item.cost) return res.status(400).json({ error: 'Not enough points' });
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        
+        const item = await Item.findOne({ id: rewardId });
+        if (!item) return res.status(400).json({ error: 'Invalid item' });
+        
+        if (item.stock === 0) return res.status(400).json({ error: 'Out of stock' });
+        if (user.balance < item.cost) return res.status(400).json({ error: 'Not enough points' });
 
-                // Deduct balance to 0 (per user's previous request to reset balance to 0 on cashout)
-                db.run('UPDATE users SET balance = 0 WHERE id = ?', [req.user.id], function(err) {
-                    if (err) return res.status(500).json({ error: 'Failed to deduct balance' });
+        user.balance = 0;
+        await user.save();
 
-                    if (item.stock > 0) {
-                        db.run('UPDATE items SET stock = stock - 1 WHERE id = ?', [item.id]);
-                    }
+        if (item.stock > 0) {
+            item.stock -= 1;
+            await item.save();
+        }
 
-                    const token = uuidv4();
-                    const timestamp = Date.now();
+        const token = uuidv4();
+        const timestamp = Date.now();
 
-                    db.run('INSERT INTO orders (user_id, name, token, points, timestamp) VALUES (?, ?, ?, ?, ?)', 
-                        [req.user.id, item.name, token, item.cost, timestamp], function(err) {
-                        res.json({ success: true, token });
-                    });
-                });
-            });
-        });
-    });
+        await Order.create({ user_id: user._id, name: item.name, token, points: item.cost, timestamp });
+        res.json({ success: true, token });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
-router.get('/history', authenticateToken, (req, res) => {
-    db.all('SELECT name, token, points, timestamp FROM orders WHERE user_id = ? ORDER BY timestamp DESC', [req.user.id], (err, rows) => {
-        const history = (rows || []).map(r => ({ ...r, date: new Date(r.timestamp).toLocaleDateString() }));
+router.get('/history', authenticateToken, async (req, res) => {
+    try {
+        const rows = await Order.find({ user_id: req.user.id }).sort({ timestamp: -1 });
+        const history = rows.map(r => ({ name: r.name, token: r.token, points: r.points, timestamp: r.timestamp, date: new Date(r.timestamp).toLocaleDateString() }));
         res.json({ success: true, history });
-    });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
 // --- ADMIN USERS ENDPOINTS ---
 
-router.get('/admin/users', authenticateAdmin, (req, res) => {
-    db.all('SELECT id, username, email, balance, role, banned, created_at FROM users', (err, rows) => {
-        res.json({ success: true, users: rows || [] });
-    });
+router.get('/admin/users', authenticateAdmin, async (req, res) => {
+    try {
+        const rows = await User.find({});
+        const users = rows.map(r => ({ id: r.id, username: r.username, email: r.email, balance: r.balance, role: r.role, banned: r.banned, created_at: r.created_at }));
+        res.json({ success: true, users });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
-router.post('/admin/users/:id/points', authenticateAdmin, (req, res) => {
+router.post('/admin/users/:id/points', authenticateAdmin, async (req, res) => {
     const { amount } = req.body;
-    db.run('UPDATE users SET balance = balance + ? WHERE id = ?', [amount, req.params.id], err => {
-        res.json({ success: !err });
-    });
+    try {
+        await User.findByIdAndUpdate(req.params.id, { $inc: { balance: amount } });
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
-router.post('/admin/users/:id/ban', authenticateAdmin, (req, res) => {
+router.post('/admin/users/:id/ban', authenticateAdmin, async (req, res) => {
     const { banned } = req.body;
-    db.run('UPDATE users SET banned = ? WHERE id = ?', [banned ? 1 : 0, req.params.id], err => {
-        res.json({ success: !err });
-    });
+    try {
+        await User.findByIdAndUpdate(req.params.id, { banned: banned ? true : false });
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
-router.post('/admin/users/:id/role', authenticateAdmin, (req, res) => {
+router.post('/admin/users/:id/role', authenticateAdmin, async (req, res) => {
     const { role } = req.body;
     if (role !== 'admin' && role !== 'user') return res.status(400).json({ error: 'Invalid role' });
-    db.run('UPDATE users SET role = ? WHERE id = ?', [role, req.params.id], err => {
-        res.json({ success: !err });
-    });
+    try {
+        await User.findByIdAndUpdate(req.params.id, { role });
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
-// --- CPA ENDPOINTS (Unchanged structurally, just uses user_id correctly) ---
-router.get('/postback', (req, res) => {
+// --- CPA ENDPOINTS ---
+router.get('/postback', async (req, res) => {
     const { user_id, secret, reward } = req.query;
     const expectedSecret = process.env.BITCOTASKS_SECRET;
     if (expectedSecret && secret !== expectedSecret) return res.status(401).json({ error: 'Unauthorized' });
     if (!user_id) return res.status(400).json({ error: 'Missing user_id' });
     const rewardAmount = parseInt(reward) || 150;
     
-    db.run('UPDATE users SET balance = balance + ? WHERE id = ?', [rewardAmount, user_id], function(err) {
-        if (err) return res.status(500).json({ error: 'Error' });
+    try {
+        await User.findByIdAndUpdate(user_id, { $inc: { balance: rewardAmount } });
         res.status(200).json({ success: true });
-    });
+    } catch (e) {
+        res.status(500).json({ error: 'Error' });
+    }
 });
 
-router.get('/test-postback', (req, res) => {
+router.get('/test-postback', async (req, res) => {
     const { user_id, reward } = req.query;
     if (!user_id) return res.status(400).json({ error: 'Missing user_id' });
     const rewardAmount = parseInt(reward) || 150;
     
-    db.run('UPDATE users SET balance = balance + ? WHERE id = ?', [rewardAmount, user_id], function(err) {
-        if (err) return res.status(500).json({ error: 'Error' });
+    try {
+        await User.findByIdAndUpdate(user_id, { $inc: { balance: rewardAmount } });
         res.status(200).json({ success: true });
-    });
+    } catch (e) {
+        res.status(500).json({ error: 'Error' });
+    }
 });
 
 router.get('/check-status', (req, res) => {
     const { user_id } = req.query;
     if (!user_id) return res.status(400).json({ error: 'Missing user_id' });
-    
-    // We'll just return the user's current balance and let the frontend check if it went up.
-    // However, the frontend expects { status: 'completed', token: '...' } when a survey finishes.
-    // Since we don't have a survey tracking table, we'll just return a success if the user exists,
-    // but without a token, the frontend's check-status logic won't trigger the alert loop.
-    // Actually, to make Bitcotasks polling work without a database table for surveys,
-    // we can track recent completions in memory.
-    
-    // To fix the "reset the balance" issue and "pays double times", 
-    // we just need the backend to process postbacks correctly.
-    // The issue was likely due to the frontend doing processPendingRewards AND the polling doing it too.
     res.json({ success: true });
 });
 
