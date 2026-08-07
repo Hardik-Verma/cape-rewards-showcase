@@ -82,24 +82,17 @@
     </div>
 
     <script>
-        let googleInitInterval = setInterval(() => {
-            if (window.google && document.getElementById("google-btn-container")) {
-                clearInterval(googleInitInterval);
-                if (window.GOOGLE_CLIENT_ID && document.getElementById("google-btn-container").innerHTML === '') {
-                    google.accounts.id.initialize({
-                        client_id: window.GOOGLE_CLIENT_ID,
-                        callback: handleGoogleLogin
-                    });
-                    google.accounts.id.renderButton(
-                        document.getElementById("google-btn-container"),
-                        { theme: "outline", size: "large", text: "signin_with" }
-                    );
-                }
-            }
-        }, 100);
-
         function initGoogleAuth() {
-            // Managed by interval now
+            if (window.GOOGLE_CLIENT_ID) {
+                google.accounts.id.initialize({
+                    client_id: window.GOOGLE_CLIENT_ID,
+                    callback: handleGoogleLogin
+                });
+                google.accounts.id.renderButton(
+                    document.getElementById("google-btn-container"),
+                    { theme: "filled_black", size: "large", text: "signin_with" }
+                );
+            }
         }
 
         async function handleGoogleLogin(response) {
