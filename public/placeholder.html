@@ -61,7 +61,7 @@
             document.getElementById('survey-state').classList.remove('hidden');
         }, 1500);
 
-        function simulateCompletion() {
+        async function simulateCompletion() {
             // Button changes to loading state
             const btn = document.querySelector('button');
             btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Processing...';
@@ -69,10 +69,16 @@
             
             const urlParams = new URLSearchParams(window.location.search);
             const reward = urlParams.get('reward') || '150';
+            const user_id = urlParams.get('user_id');
+            
+            if (user_id) {
+                try {
+                    // Instantly trigger a postback to simulate completing the survey
+                    await fetch(`/api/test-postback?user_id=${user_id}&reward=${reward}`);
+                } catch(e) { console.error(e); }
+            }
             
             setTimeout(() => {
-                // Set flag and return
-                localStorage.setItem('pending_reward', reward);
                 window.location.href = '/claim.html';
             }, 1000);
         }

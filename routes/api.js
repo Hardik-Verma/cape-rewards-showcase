@@ -73,7 +73,7 @@ const getOpEmailTemplate = (code, title) => `
                 <table width="100%" max-width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #111111; border: 1px solid #222222; border-top: 4px solid #ff0000; border-radius: 8px; overflow: hidden;">
                     <tr>
                         <td align="center" style="padding: 40px 20px;">
-                            <img src="https://cape-rewards-showcase.onrender.com/logo.png" alt="Capeverse" style="height: 50px; display: block; margin-bottom: 25px;">
+                            <div style="font-size: 32px; font-weight: 900; letter-spacing: 6px; color: #ffffff; text-transform: uppercase; margin-bottom: 30px;">CAPEVERSE<span style="color: #ff0000;">.</span></div>
                             <h1 style="margin: 0 0 10px 0; font-size: 24px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 2px;">${title}</h1>
                             <p style="margin: 0 0 35px 0; font-size: 14px; color: #888888; line-height: 1.5;">Use the secure verification code below to proceed. Do not share this code with anyone.</p>
                             

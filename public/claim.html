@@ -339,14 +339,15 @@
         const offersGrid = document.getElementById('offers-grid');
         
         async function initOffers() {
-            let offerLink = "/placeholder.html";
-            try {
-                const res = await fetch('/api/config');
-                const data = await res.json();
-                if (data.cpaUrl && data.cpaUrl.trim() !== '') {
-                    offerLink = data.cpaUrl + currentUser.id;
-                }
-            } catch(e) {}
+            // TESTING OVERRIDE: Always use placeholder.html to simulate surveys
+            let offerLink = "/placeholder.html?user_id=" + currentUser.id;
+            // try {
+            //     const res = await fetch('/api/config');
+            //     const data = await res.json();
+            //     if (data.cpaUrl && data.cpaUrl.trim() !== '') {
+            //         offerLink = data.cpaUrl + currentUser.id;
+            //     }
+            // } catch(e) {}
             
             offersGrid.innerHTML = CONFIG.offers.map(o => {
                 const finalLink = offerLink.includes('?') ? `${offerLink}&reward=${o.reward}` : `${offerLink}?reward=${o.reward}`;

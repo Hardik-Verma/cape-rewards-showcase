@@ -82,18 +82,16 @@
     </div>
 
     <script>
-        fetch('/api/config').then(res => res.json()).then(config => {
-            if (config.googleClientId) {
-                google.accounts.id.initialize({
-                    client_id: config.googleClientId,
-                    callback: handleGoogleLogin
-                });
-                google.accounts.id.renderButton(
-                    document.getElementById("google-btn-container"),
-                    { theme: "outline", size: "large", text: "signin_with" }
-                );
-            }
-        });
+        if (window.GOOGLE_CLIENT_ID) {
+            google.accounts.id.initialize({
+                client_id: window.GOOGLE_CLIENT_ID,
+                callback: handleGoogleLogin
+            });
+            google.accounts.id.renderButton(
+                document.getElementById("google-btn-container"),
+                { theme: "outline", size: "large", text: "signin_with" }
+            );
+        }
 
         async function handleGoogleLogin(response) {
             const res = await fetch('/api/auth/google', {
