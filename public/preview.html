@@ -329,9 +329,13 @@
                     `).join('');
                     document.getElementById('cashout-modal').classList.remove('hidden');
                     document.getElementById('cashout-modal').classList.add('flex');
-                    document.getElementById('cashout-modal').querySelector('button').style.display = 'none'; // hide close btn
                 }
             } catch(e) {}
+        }
+
+        function closeCashoutModal() {
+            document.getElementById('cashout-modal').classList.add('hidden');
+            document.getElementById('cashout-modal').classList.remove('flex');
         }
     
         document.addEventListener('DOMContentLoaded', () => {
