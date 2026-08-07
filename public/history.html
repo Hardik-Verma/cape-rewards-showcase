@@ -107,30 +107,30 @@
                     <!-- Date Filter -->
                     <div class="flex flex-col gap-1 w-full sm:w-auto">
                         <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Filter By Date</label>
-                        <select id="filter-date" onchange="renderHistory()" class="bg-black/50 border border-white/10 text-gray-300 text-xs font-bold uppercase tracking-widest rounded-xl p-3 focus:outline-none focus:border-red-500/50 w-full">
-                            <option value="all">All Time</option>
-                            <option value="today">Today</option>
-                            <option value="yesterday">Yesterday</option>
-                            <option value="7days">Past 7 Days</option>
-                            <option value="30days">Past 30 Days</option>
+                        <select id="filter-date" onchange="renderHistory()" class="bg-black/50 border border-white/10 text-gray-300 text-xs font-bold uppercase tracking-widest rounded-xl p-3 focus:outline-none focus:border-red-500/50 w-full cursor-pointer hover:bg-white/5 transition-colors">
+                            <option value="all" class="bg-[#0a0a0a] text-gray-300 py-1">All Time</option>
+                            <option value="today" class="bg-[#0a0a0a] text-gray-300 py-1">Today</option>
+                            <option value="yesterday" class="bg-[#0a0a0a] text-gray-300 py-1">Yesterday</option>
+                            <option value="7days" class="bg-[#0a0a0a] text-gray-300 py-1">Past 7 Days</option>
+                            <option value="30days" class="bg-[#0a0a0a] text-gray-300 py-1">Past 30 Days</option>
                         </select>
                     </div>
 
                     <!-- Sort By -->
                     <div class="flex flex-col gap-1 w-full sm:w-auto">
                         <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Sort By</label>
-                        <select id="sort-by" onchange="renderHistory()" class="bg-black/50 border border-white/10 text-gray-300 text-xs font-bold uppercase tracking-widest rounded-xl p-3 focus:outline-none focus:border-red-500/50 w-full">
-                            <option value="date">Date</option>
-                            <option value="points">Points Spent</option>
+                        <select id="sort-by" onchange="renderHistory()" class="bg-black/50 border border-white/10 text-gray-300 text-xs font-bold uppercase tracking-widest rounded-xl p-3 focus:outline-none focus:border-red-500/50 w-full cursor-pointer hover:bg-white/5 transition-colors">
+                            <option value="date" class="bg-[#0a0a0a] text-gray-300 py-1">Date</option>
+                            <option value="points" class="bg-[#0a0a0a] text-gray-300 py-1">Points Spent</option>
                         </select>
                     </div>
 
                     <!-- Order -->
                     <div class="flex flex-col gap-1 w-full sm:w-auto">
                         <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Order</label>
-                        <select id="sort-order" onchange="renderHistory()" class="bg-black/50 border border-white/10 text-gray-300 text-xs font-bold uppercase tracking-widest rounded-xl p-3 focus:outline-none focus:border-red-500/50 w-full">
-                            <option value="desc">Descending</option>
-                            <option value="asc">Ascending</option>
+                        <select id="sort-order" onchange="renderHistory()" class="bg-black/50 border border-white/10 text-gray-300 text-xs font-bold uppercase tracking-widest rounded-xl p-3 focus:outline-none focus:border-red-500/50 w-full cursor-pointer hover:bg-white/5 transition-colors">
+                            <option value="desc" class="bg-[#0a0a0a] text-gray-300 py-1">Descending</option>
+                            <option value="asc" class="bg-[#0a0a0a] text-gray-300 py-1">Ascending</option>
                         </select>
                     </div>
                 </div>
@@ -176,6 +176,8 @@
         function logout() {
             localStorage.removeItem('auth_token');
             window.location.href = '/login.html';
+        }
+
         function copyKey(btnElement, textToCopy) {
             let text = textToCopy;
             if (navigator.clipboard && window.isSecureContext) {
