@@ -16,6 +16,23 @@ router.get('/config', (req, res) => {
     });
 });
 
+// Brevo API keep-alive to prevent 90-day expiration
+if (process.env.BREVO_API_KEY) {
+    const keepBrevoAlive = async () => {
+        try {
+            await fetch('https://api.brevo.com/v3/account', {
+                method: 'GET',
+                headers: { 'api-key': process.env.BREVO_API_KEY }
+            });
+            console.log('Brevo API key keep-alive ping successful.');
+        } catch (e) {
+            console.error('Brevo API key keep-alive ping failed.');
+        }
+    };
+    keepBrevoAlive(); // Run once on startup
+    setInterval(keepBrevoAlive, 24 * 60 * 60 * 1000); // Run every 24 hours
+}
+
 // Auth Middleware
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
