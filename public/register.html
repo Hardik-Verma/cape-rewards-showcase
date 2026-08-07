@@ -102,7 +102,11 @@
                 const res = await fetch('/api/config');
                 const data = await res.json();
                 const clientId = data.googleClientId;
-                if (!clientId) return;
+                if (!clientId) {
+                    document.getElementById('error-msg').innerText = "Developer Error: GOOGLE_CLIENT_ID is missing from backend environment variables.";
+                    document.getElementById('error-msg').classList.remove('hidden');
+                    return;
+                }
 
                 window.initGoogleAuth = () => {
                     google.accounts.id.initialize({
