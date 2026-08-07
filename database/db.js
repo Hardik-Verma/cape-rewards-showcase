@@ -80,7 +80,7 @@ db.serialize(() => {
     const bcrypt = require('bcryptjs');
     db.get("SELECT id FROM users WHERE username = 'admin'", async (err, row) => {
         if (!row) {
-            const hash = await bcrypt.hash('XqV7kL2mP9rD4wJc', 10);
+            const hash = await bcrypt.hash('ZpL9mK4tR2vD7wXb', 10);
             db.run("INSERT INTO users (username, password_hash, is_verified, role) VALUES ('admin', ?, 1, 'admin')", [hash]);
             console.log("Default admin account seeded.");
         }
