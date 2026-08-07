@@ -104,24 +104,10 @@
         
         /* Hide UI clutter during Fullscreen Cinematic mode */
         :fullscreen #scroll-top-btn { display: none !important; }
-        
-        .ambient-orb {
-            position: fixed;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 100vw; height: 100vw; max-width: 1000px; max-height: 1000px;
-            background: radial-gradient(circle, rgba(220,38,38,0.15) 0%, rgba(0,0,0,0) 60%);
-            z-index: 1; pointer-events: none;
-            animation: pulse-orb 8s ease-in-out infinite alternate;
-        }
-        @keyframes pulse-orb {
-            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.9); }
-            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-        }
     </style>
 </head>
 <body>
 
-    <div class="ambient-orb"></div>
     <div class="noise"></div>
 
     <nav class="nav-glass fixed w-full top-0 z-50">
@@ -129,7 +115,8 @@
             <div class="flex items-center justify-between h-20">
                 <div class="flex-shrink-0 flex items-center">
                     <a href="/index.html" class="flex items-center gap-3">
-                        <span class="text-red-500 font-black text-2xl tracking-[0.3em] uppercase pt-0.5" style="text-shadow: 0 0 20px rgba(220, 38, 38, 0.5);">CAPEVERSE<span class="text-white">.</span></span>
+                        <img src="/logo.png" alt="Logo" class="h-9">
+                        <span class="text-white font-bold text-lg tracking-[0.2em] uppercase pt-0.5">CAPEVERSE</span>
                     </a>
                 </div>
                 <!-- Mobile Menu Button -->
@@ -215,8 +202,8 @@
 
             <!-- Intro Hero (Fades out immediately on scroll) -->
             <div class="detail-panel panel-center" id="intro-hero" style="opacity: 1; transform: translate(-50%, -50%);">
-                <h1 class="text-4xl sm:text-6xl md:text-8xl font-black uppercase tracking-widest text-red-500 mb-2 whitespace-nowrap" style="text-shadow: 0 0 40px rgba(220,38,38,0.5);">CAPEVERSE<span class="text-white">.</span></h1>
-                <div class="text-xs uppercase tracking-[0.4em] text-gray-400 mb-8">SECURE YOUR DIGITAL ARSENAL</div>
+                <h1 class="text-4xl sm:text-6xl md:text-8xl font-black uppercase tracking-widest text-white mb-2 whitespace-nowrap">Capeverse</h1>
+                <div class="text-xs uppercase tracking-[0.4em] text-gray-400 mb-8">Scroll To Unlock</div>
                 
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
