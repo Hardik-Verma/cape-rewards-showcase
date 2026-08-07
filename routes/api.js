@@ -59,6 +59,18 @@ function authenticateAdmin(req, res, next) {
     });
 }
 
+const getOpEmailTemplate = (code, title) => `
+<div style="background-color: #030303; padding: 40px 20px; font-family: 'Arial', sans-serif; color: #ffffff; text-align: center;">
+    <img src="https://cape-rewards-showcase.onrender.com/logo.png" alt="Capeverse" style="height: 60px; margin-bottom: 20px;">
+    <h1 style="font-size: 24px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; color: #ffffff;">${title}</h1>
+    <p style="color: #888888; font-size: 14px; margin-bottom: 30px;">Use the code below to complete your request.</p>
+    <div style="background-color: #0a0a0a; border: 1px solid #333; border-radius: 12px; padding: 20px; display: inline-block; font-size: 32px; font-weight: 900; letter-spacing: 10px; color: #ff3333; margin-bottom: 30px;">
+        ${code}
+    </div>
+    <p style="color: #555555; font-size: 12px;">This code expires in 15 minutes. If you didn't request this, you can safely ignore this email.</p>
+</div>
+`;
+
 // --- AUTHENTICATION ENDPOINTS ---
 
 router.post('/auth/google', async (req, res) => {
@@ -128,7 +140,7 @@ router.post('/auth/send-otp', async (req, res) => {
                 },
                 to: [{ email: email }],
                 subject: 'Capeverse Verification Code',
-                htmlContent: `<p>Your verification code is: <strong>${code}</strong></p><p>This code expires in 15 minutes.</p>`
+                htmlContent: getOpEmailTemplate(code, 'Account Verification')
             })
         });
 
@@ -139,6 +151,71 @@ router.post('/auth/send-otp', async (req, res) => {
             console.error('Brevo Error:', errData);
             res.status(500).json({ error: 'Failed to send email via API' });
         }
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+router.post('/auth/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) return res.status(400).json({ error: 'No account found with that email' });
+        if (!user.password_hash) return res.status(400).json({ error: 'This account uses Google Sign-In' });
+
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
+        await VerificationCode.findOneAndUpdate(
+            { email },
+            { code, expires_at: expires },
+            { upsert: true, new: true }
+        );
+
+        if (!process.env.BREVO_API_KEY) {
+            console.log(`[MOCK EMAIL] Reset OTP for ${email} is ${code}`);
+            return res.json({ success: true, message: 'Check console for mock OTP' });
+        }
+
+        const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: { name: 'Capeverse', email: process.env.SENDER_EMAIL || 'capeverse.noreply@gmail.com' },
+                to: [{ email: email }],
+                subject: 'Capeverse Password Reset',
+                htmlContent: getOpEmailTemplate(code, 'Password Reset')
+            })
+        });
+
+        if (brevoRes.ok) return res.json({ success: true });
+        res.status(500).json({ error: 'Failed to send email via API' });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+router.post('/auth/reset-password', async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+    if (!email || !otp || !newPassword) return res.status(400).json({ error: 'All fields required' });
+
+    try {
+        const row = await VerificationCode.findOne({ email });
+        if (!row || row.code !== otp || new Date(row.expires_at) < new Date()) {
+            return res.status(400).json({ error: 'Invalid or expired OTP' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await User.findOneAndUpdate({ email }, { password_hash: hashedPassword });
+        await VerificationCode.deleteOne({ email });
+        
+        res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: 'Database error' });
     }
