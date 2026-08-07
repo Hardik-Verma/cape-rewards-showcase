@@ -23,21 +23,45 @@
             animation: animStar 50s linear infinite;
         }
         @keyframes animStar { from { transform: translateY(-100vh); } to { transform: translateY(100vh); } }
-        .glass-panel { background: #0a0a0a; border-radius: calc(1rem - 1px) !important; position: relative; z-index: 2; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-panel { 
+            background: rgba(10, 10, 10, 0.7); 
+            backdrop-filter: blur(20px);
+            border-radius: calc(1rem - 1px) !important; 
+            position: relative; 
+            z-index: 2; 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            box-shadow: 0 0 40px rgba(220, 38, 38, 0.08), inset 0 0 20px rgba(255, 255, 255, 0.02);
+            transition: box-shadow 0.3s ease;
+        }
+        .glass-panel:hover {
+            box-shadow: 0 0 60px rgba(220, 38, 38, 0.15), inset 0 0 30px rgba(255, 255, 255, 0.03);
+        }
+        .ambient-orb {
+            position: fixed;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80vw; height: 80vw; max-width: 800px; max-height: 800px;
+            background: radial-gradient(circle, rgba(220,38,38,0.12) 0%, rgba(0,0,0,0) 60%);
+            z-index: -1; pointer-events: none;
+            animation: pulse-orb 8s ease-in-out infinite alternate;
+        }
+        @keyframes pulse-orb {
+            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.9); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen bg-[#030303] items-center justify-center p-4">
 
+    <div class="ambient-orb"></div>
     <div class="stars"><div class="stars-layer1" style="width: 2px; height: 2px; box-shadow: 10vw 10vh #fff, 20vw 20vh #fff, 30vw 30vh #fff, 40vw 40vh #fff, 50vw 50vh #fff, 60vw 60vh #fff, 70vw 70vh #fff, 80vw 80vh #fff, 90vw 90vh #fff;"></div></div>
 
     <div class="w-full max-w-md glass-panel p-8">
         <div class="text-center mb-8">
             <a href="/index.html" class="inline-flex items-center justify-center gap-3 mb-6">
-                <img src="/logo.png" alt="Logo" class="h-10">
-                <span class="text-white font-black text-xl tracking-[0.2em] uppercase pt-0.5">CAPEVERSE</span>
+                <span class="text-red-500 font-black text-2xl tracking-[0.3em] uppercase pt-0.5" style="text-shadow: 0 0 20px rgba(220, 38, 38, 0.5);">CAPEVERSE<span class="text-white">.</span></span>
             </a>
-            <h1 class="text-2xl font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-2">Create Account</h1>
-            <p class="text-xs text-gray-500 font-bold uppercase tracking-widest mb-4">Join the exclusive network.</p>
+            <h1 class="text-2xl font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-2">SECURE YOUR ARSENAL</h1>
+            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-4">Join the exclusive network and dominate.</p>
             <a href="/index.html" class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-red-500 transition-colors inline-flex items-center gap-1">
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Go Back Home
             </a>

@@ -23,11 +23,36 @@
             animation: animStar 50s linear infinite;
         }
         @keyframes animStar { from { transform: translateY(-100vh); } to { transform: translateY(100vh); } }
-        .glass-panel { background: #0a0a0a; border-radius: calc(1rem - 1px) !important; position: relative; z-index: 2; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-panel { 
+            background: rgba(10, 10, 10, 0.7); 
+            backdrop-filter: blur(20px);
+            border-radius: calc(1rem - 1px) !important; 
+            position: relative; 
+            z-index: 2; 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            box-shadow: 0 0 40px rgba(220, 38, 38, 0.08), inset 0 0 20px rgba(255, 255, 255, 0.02);
+            transition: box-shadow 0.3s ease;
+        }
+        .glass-panel:hover {
+            box-shadow: 0 0 60px rgba(220, 38, 38, 0.15), inset 0 0 30px rgba(255, 255, 255, 0.03);
+        }
+        .ambient-orb {
+            position: fixed;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80vw; height: 80vw; max-width: 800px; max-height: 800px;
+            background: radial-gradient(circle, rgba(220,38,38,0.12) 0%, rgba(0,0,0,0) 60%);
+            z-index: -1; pointer-events: none;
+            animation: pulse-orb 8s ease-in-out infinite alternate;
+        }
+        @keyframes pulse-orb {
+            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.9); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen bg-[#030303] items-center justify-center p-4">
 
+    <div class="ambient-orb"></div>
     <div class="stars"><div class="stars-layer1" style="width: 2px; height: 2px; box-shadow: 10vw 10vh #fff, 20vw 20vh #fff, 30vw 30vh #fff, 40vw 40vh #fff, 50vw 50vh #fff, 60vw 60vh #fff, 70vw 70vh #fff, 80vw 80vh #fff, 90vw 90vh #fff;"></div></div>
 
     <div class="w-full max-w-md glass-panel p-8">
