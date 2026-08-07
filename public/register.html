@@ -6,7 +6,6 @@
     <title>Register | CAPEVERSE</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://accounts.google.com/gsi/client?onload=initGoogleAuth" async defer></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -98,14 +97,14 @@
     </div>
 
     <script>
-        async function initGoogleAuth() {
+        async function loadGoogleAuth() {
             try {
                 const res = await fetch('/api/config');
                 const data = await res.json();
                 const clientId = data.googleClientId;
                 if (!clientId) return;
 
-                const init = () => {
+                window.initGoogleAuth = () => {
                     google.accounts.id.initialize({
                         client_id: clientId,
                         callback: handleGoogleLogin
@@ -116,15 +115,22 @@
                     );
                 };
 
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', init);
-                } else {
-                    init();
-                }
+                const script = document.createElement('script');
+                script.src = "https://accounts.google.com/gsi/client?onload=initGoogleAuth";
+                script.async = true;
+                script.defer = true;
+                document.head.appendChild(script);
             } catch (err) {
                 console.error('Google Auth Init Error:', err);
             }
         }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadGoogleAuth);
+        } else {
+            loadGoogleAuth();
+        }
+
 
         async function handleGoogleLogin(response) {
             const res = await fetch('/api/auth/google', {
