@@ -108,22 +108,34 @@
                     return;
                 }
 
-                window.initGoogleAuth = () => {
-                    google.accounts.id.initialize({
-                        client_id: clientId,
-                        callback: handleGoogleLogin
-                    });
-                    google.accounts.id.renderButton(
-                        document.getElementById("google-btn-container"),
-                        { theme: "filled_black", size: "large", text: "signup_with" }
-                    );
-                };
-
                 const script = document.createElement('script');
-                script.src = "https://accounts.google.com/gsi/client?onload=initGoogleAuth";
+                script.src = "https://accounts.google.com/gsi/client";
                 script.async = true;
                 script.defer = true;
-                document.head.appendChild(script);
+                
+                script.onload = () => {
+                    try {
+                        google.accounts.id.initialize({
+                            client_id: clientId.trim(),
+                            callback: handleGoogleLogin
+                        });
+                        google.accounts.id.renderButton(
+                            document.getElementById("google-btn-container"),
+                            { theme: "outline", size: "large", text: "signup_with" }
+                        );
+                    } catch (e) {
+                        console.error('Google Render Error:', e);
+                        document.getElementById('error-msg').innerText = "Google Auth Render Error: " + e.message;
+                        document.getElementById('error-msg').classList.remove('hidden');
+                    }
+                };
+                
+                script.onerror = () => {
+                    document.getElementById('error-msg').innerText = "Failed to load Google Auth script. Check your Adblocker or connection.";
+                    document.getElementById('error-msg').classList.remove('hidden');
+                };
+
+                document.body.appendChild(script);
             } catch (err) {
                 console.error('Google Auth Init Error:', err);
             }
