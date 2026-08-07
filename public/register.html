@@ -85,6 +85,9 @@
             <button type="submit" id="register-btn" class="w-full bg-emerald-500 text-black font-black uppercase tracking-widest text-sm p-4 rounded-xl hover:bg-emerald-400 transition-colors hidden">
                 Complete Registration
             </button>
+            <button type="button" id="resend-otp-btn" class="w-full bg-transparent border border-white/10 text-gray-500 font-bold uppercase tracking-widest text-xs p-3 rounded-xl hover:text-white hover:border-white/30 transition-colors hidden" disabled>
+                Resend Code (30s)
+            </button>
         </form>
 
         <div class="mt-8 text-center">
@@ -150,6 +153,8 @@
                     document.getElementById('password-group').classList.remove('hidden');
                     document.getElementById('otp-group').classList.remove('hidden');
                     document.getElementById('register-btn').classList.remove('hidden');
+                    document.getElementById('resend-otp-btn').classList.remove('hidden');
+                    startResendTimer(30);
                 } else {
                     sendOtpBtn.disabled = false;
                     sendOtpBtn.innerText = 'Send Verification Code';
@@ -159,6 +164,61 @@
             } catch (err) {
                 sendOtpBtn.disabled = false;
                 sendOtpBtn.innerText = 'Send Verification Code';
+                document.getElementById('error-msg').innerText = 'Network error. Please try again.';
+                document.getElementById('error-msg').classList.remove('hidden');
+            }
+        });
+
+        let resendInterval;
+        function startResendTimer(seconds) {
+            const resendBtn = document.getElementById('resend-otp-btn');
+            resendBtn.disabled = true;
+            let timeLeft = seconds;
+            resendBtn.innerText = `Resend Code (${timeLeft}s)`;
+            
+            clearInterval(resendInterval);
+            resendInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(resendInterval);
+                    resendBtn.disabled = false;
+                    resendBtn.innerText = 'Resend Code';
+                } else {
+                    resendBtn.innerText = `Resend Code (${timeLeft}s)`;
+                }
+            }, 1000);
+        }
+
+        document.getElementById('resend-otp-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            if (!email) return;
+
+            const resendBtn = document.getElementById('resend-otp-btn');
+            resendBtn.disabled = true;
+            resendBtn.innerText = 'Sending...';
+
+            try {
+                const res = await fetch('/api/auth/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    document.getElementById('success-msg').innerText = 'New Code Sent! Check your email.';
+                    document.getElementById('success-msg').classList.remove('hidden');
+                    document.getElementById('error-msg').classList.add('hidden');
+                    startResendTimer(30);
+                } else {
+                    resendBtn.disabled = false;
+                    resendBtn.innerText = 'Resend Code';
+                    document.getElementById('error-msg').innerText = data.error;
+                    document.getElementById('error-msg').classList.remove('hidden');
+                }
+            } catch (err) {
+                resendBtn.disabled = false;
+                resendBtn.innerText = 'Resend Code';
                 document.getElementById('error-msg').innerText = 'Network error. Please try again.';
                 document.getElementById('error-msg').classList.remove('hidden');
             }
