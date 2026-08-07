@@ -692,6 +692,45 @@
                     mobileMenu.classList.toggle('hidden');
                 });
             }
+
+            // Dynamic Auth UI
+            const authToken = localStorage.getItem('auth_token');
+            if (authToken) {
+                // Change 'Preview' links to 'Dashboard' and link to /claim.html
+                document.querySelectorAll('a[href="/preview.html"]').forEach(el => {
+                    el.href = '/claim.html';
+                    if (el.innerText.includes('Preview Rewards')) {
+                        el.innerText = 'Go to Dashboard';
+                    } else if (el.innerText.includes('Preview')) {
+                        el.innerText = 'Dashboard';
+                    }
+                    // Retain inner spans/classes by just swapping text node if needed, 
+                    // but since they are simple links we can just replace text and href
+                });
+                
+                // Add Logout to Desktop Nav
+                const desktopNav = document.querySelector('.hidden.md\\:flex .ml-10');
+                if (desktopNav) {
+                    const logoutBtn = document.createElement('button');
+                    logoutBtn.onclick = () => { localStorage.removeItem('auth_token'); window.location.reload(); };
+                    logoutBtn.className = 'relative group text-red-500 hover:text-red-400 px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase';
+                    logoutBtn.innerText = 'Logout';
+                    
+                    // Insert before the Discord icon (which is the last child)
+                    desktopNav.insertBefore(logoutBtn, desktopNav.lastElementChild);
+                }
+
+                // Add Logout to Mobile Nav
+                const mobileNavContainer = document.querySelector('#mobile-menu .px-4');
+                if (mobileNavContainer) {
+                    const logoutBtn = document.createElement('button');
+                    logoutBtn.onclick = () => { localStorage.removeItem('auth_token'); window.location.reload(); };
+                    logoutBtn.className = 'w-full text-left block px-4 py-3 text-xs font-semibold text-red-500 tracking-widest uppercase hover:text-red-400 hover:bg-white/5 rounded-md transition-colors';
+                    logoutBtn.innerText = 'Logout';
+                    
+                    mobileNavContainer.insertBefore(logoutBtn, mobileNavContainer.lastElementChild);
+                }
+            }
         });
     </script>
 </body>
