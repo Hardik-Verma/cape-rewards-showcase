@@ -60,18 +60,41 @@ function authenticateAdmin(req, res, next) {
 }
 
 const getOpEmailTemplate = (code, title) => `
-<div style="background-color: #000000; padding: 40px 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #ffffff; text-align: center; background-image: radial-gradient(circle at top, #1a0000 0%, #000000 100%);">
-    <div style="max-width: 600px; margin: 0 auto; background: rgba(10,10,10,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 40px 20px; box-shadow: 0 4px 30px rgba(0,0,0,0.5);">
-        <img src="https://cape-rewards-showcase.onrender.com/logo.png" alt="Capeverse" style="height: 60px; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;">
-        <h1 style="font-size: 28px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 10px; color: #ffffff; text-shadow: 0 0 10px rgba(255,0,0,0.3);">${title}</h1>
-        <div style="height: 2px; width: 50px; background: #ff3333; margin: 0 auto 30px auto;"></div>
-        <p style="color: #aaaaaa; font-size: 15px; margin-bottom: 30px; letter-spacing: 1px;">Use the secure code below to complete your request.</p>
-        <div style="background: linear-gradient(145deg, #111, #000); border: 1px solid #333; border-radius: 12px; padding: 25px 40px; display: inline-block; font-size: 40px; font-weight: 900; letter-spacing: 15px; color: #ff3333; margin-bottom: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,1), 0 0 15px rgba(255,51,51,0.2);">
-            ${code}
-        </div>
-        <p style="color: #666666; font-size: 12px; margin-top: 20px;">This code expires in 15 minutes.<br>If you didn't request this, safely ignore this email.</p>
-    </div>
-</div>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+</head>
+<body style="margin: 0; padding: 0; background-color: #050505; font-family: Arial, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #050505; padding: 40px 10px;">
+        <tr>
+            <td align="center">
+                <!-- Main Card -->
+                <table width="100%" max-width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #111111; border: 1px solid #222222; border-top: 4px solid #ff0000; border-radius: 8px; overflow: hidden;">
+                    <tr>
+                        <td align="center" style="padding: 40px 20px;">
+                            <img src="https://cape-rewards-showcase.onrender.com/logo.png" alt="Capeverse" style="height: 50px; display: block; margin-bottom: 25px;">
+                            <h1 style="margin: 0 0 10px 0; font-size: 24px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 2px;">${title}</h1>
+                            <p style="margin: 0 0 35px 0; font-size: 14px; color: #888888; line-height: 1.5;">Use the secure verification code below to proceed. Do not share this code with anyone.</p>
+                            
+                            <!-- Code Box -->
+                            <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto; background-color: #1a0505; border: 2px solid #ff0000; border-radius: 8px;">
+                                <tr>
+                                    <td align="center" style="padding: 20px 40px;">
+                                        <span style="font-size: 36px; font-weight: 900; color: #ff3333; letter-spacing: 12px; font-family: monospace;">${code}</span>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="margin: 35px 0 0 0; font-size: 12px; color: #555555; line-height: 1.5;">This code will expire in 15 minutes.<br>If you did not request this, you can safely ignore this email.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
 `;
 
 // --- AUTHENTICATION ENDPOINTS ---
