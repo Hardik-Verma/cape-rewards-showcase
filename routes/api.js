@@ -261,10 +261,11 @@ router.post('/register', async (req, res) => {
         if (existingUser) return res.status(400).json({ error: 'Username or email already exists' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        await User.create({ username, email, password_hash: hashedPassword, is_verified: true });
+        const user = await User.create({ username, email, password_hash: hashedPassword, is_verified: true });
         await VerificationCode.deleteOne({ email });
         
-        res.status(201).json({ success: true, message: 'User registered' });
+        const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+        res.status(201).json({ success: true, message: 'User registered', token, role: user.role });
     } catch (e) {
         res.status(500).json({ error: 'Database error' });
     }
