@@ -6,7 +6,7 @@
     <title>Register | CAPEVERSE</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://accounts.google.com/gsi/client?onload=initGoogleAuth" async defer></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -99,15 +99,17 @@
 
     <script>
         // Check config to init Google Auth
-        if (window.GOOGLE_CLIENT_ID) {
-            google.accounts.id.initialize({
-                client_id: window.GOOGLE_CLIENT_ID,
-                callback: handleGoogleLogin
-            });
-            google.accounts.id.renderButton(
-                document.getElementById("google-btn-container"),
-                { theme: "outline", size: "large", text: "signup_with" }
-            );
+        function initGoogleAuth() {
+            if (window.GOOGLE_CLIENT_ID) {
+                google.accounts.id.initialize({
+                    client_id: window.GOOGLE_CLIENT_ID,
+                    callback: handleGoogleLogin
+                });
+                google.accounts.id.renderButton(
+                    document.getElementById("google-btn-container"),
+                    { theme: "outline", size: "large", text: "signup_with" }
+                );
+            }
         }
 
         async function handleGoogleLogin(response) {
