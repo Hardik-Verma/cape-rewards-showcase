@@ -60,14 +60,17 @@ function authenticateAdmin(req, res, next) {
 }
 
 const getOpEmailTemplate = (code, title) => `
-<div style="background-color: #030303; padding: 40px 20px; font-family: 'Arial', sans-serif; color: #ffffff; text-align: center;">
-    <img src="https://cape-rewards-showcase.onrender.com/logo.png" alt="Capeverse" style="height: 60px; margin-bottom: 20px;">
-    <h1 style="font-size: 24px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; color: #ffffff;">${title}</h1>
-    <p style="color: #888888; font-size: 14px; margin-bottom: 30px;">Use the code below to complete your request.</p>
-    <div style="background-color: #0a0a0a; border: 1px solid #333; border-radius: 12px; padding: 20px; display: inline-block; font-size: 32px; font-weight: 900; letter-spacing: 10px; color: #ff3333; margin-bottom: 30px;">
-        ${code}
+<div style="background-color: #000000; padding: 40px 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #ffffff; text-align: center; background-image: radial-gradient(circle at top, #1a0000 0%, #000000 100%);">
+    <div style="max-width: 600px; margin: 0 auto; background: rgba(10,10,10,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 40px 20px; box-shadow: 0 4px 30px rgba(0,0,0,0.5);">
+        <img src="https://cape-rewards-showcase.onrender.com/logo.png" alt="Capeverse" style="height: 60px; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;">
+        <h1 style="font-size: 28px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 10px; color: #ffffff; text-shadow: 0 0 10px rgba(255,0,0,0.3);">${title}</h1>
+        <div style="height: 2px; width: 50px; background: #ff3333; margin: 0 auto 30px auto;"></div>
+        <p style="color: #aaaaaa; font-size: 15px; margin-bottom: 30px; letter-spacing: 1px;">Use the secure code below to complete your request.</p>
+        <div style="background: linear-gradient(145deg, #111, #000); border: 1px solid #333; border-radius: 12px; padding: 25px 40px; display: inline-block; font-size: 40px; font-weight: 900; letter-spacing: 15px; color: #ff3333; margin-bottom: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,1), 0 0 15px rgba(255,51,51,0.2);">
+            ${code}
+        </div>
+        <p style="color: #666666; font-size: 12px; margin-top: 20px;">This code expires in 15 minutes.<br>If you didn't request this, safely ignore this email.</p>
     </div>
-    <p style="color: #555555; font-size: 12px;">This code expires in 15 minutes. If you didn't request this, you can safely ignore this email.</p>
 </div>
 `;
 
