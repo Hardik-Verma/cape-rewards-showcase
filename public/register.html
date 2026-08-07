@@ -6,6 +6,7 @@
     <title>Register | CAPEVERSE</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -22,94 +23,160 @@
             animation: animStar 50s linear infinite;
         }
         @keyframes animStar { from { transform: translateY(-100vh); } to { transform: translateY(100vh); } }
-        .nav-glass { background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        .glass-panel { background: #0a0a0a; border-radius: calc(1rem - 1px) !important; position: relative; z-index: 2; }
-        .glow-border {
-            position: relative; border-radius: 1rem !important; overflow: hidden; padding: 1px; box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.5); z-index: 1; background: rgba(255, 255, 255, 0.05);
-        }
-        .glow-border::before {
-            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(from 0deg, transparent 70%, #dc2626 100%); animation: rotate-border 4s linear infinite; z-index: -1;
-        }
-        @keyframes rotate-border { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .glass-panel { background: #0a0a0a; border-radius: calc(1rem - 1px) !important; position: relative; z-index: 2; border: 1px solid rgba(255, 255, 255, 0.05); }
     </style>
 </head>
-<body class="flex flex-col min-h-screen bg-[#030303]">
-    <div class="stars">
-        <div class="stars-layer1" style="width: 2px; height: 2px; box-shadow: 10vw 10vh #fff, 20vw 20vh #fff, 30vw 30vh #fff, 40vw 40vh #fff, 50vw 50vh #fff, 60vw 60vh #fff, 70vw 70vh #fff, 80vw 80vh #fff, 90vw 90vh #fff, 15vw 85vh #fff, 25vw 75vh #fff, 35vw 65vh #fff, 45vw 55vh #fff, 55vw 45vh #fff, 65vw 35vh #fff, 75vw 25vh #fff, 85vw 15vh #fff, 95vw 5vh #fff;"></div>
+<body class="flex flex-col min-h-screen bg-[#030303] items-center justify-center p-4">
+
+    <div class="stars"><div class="stars-layer1" style="width: 2px; height: 2px; box-shadow: 10vw 10vh #fff, 20vw 20vh #fff, 30vw 30vh #fff, 40vw 40vh #fff, 50vw 50vh #fff, 60vw 60vh #fff, 70vw 70vh #fff, 80vw 80vh #fff, 90vw 90vh #fff;"></div></div>
+
+    <div class="w-full max-w-md glass-panel p-8">
+        <div class="text-center mb-8">
+            <a href="/index.html" class="inline-flex items-center justify-center gap-3 mb-6">
+                <img src="/logo.png" alt="Logo" class="h-10">
+                <span class="text-white font-black text-xl tracking-[0.2em] uppercase pt-0.5">CAPEVERSE</span>
+            </a>
+            <h1 class="text-2xl font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-2">Create Account</h1>
+            <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">Join the exclusive network.</p>
+        </div>
+
+        <div id="google-btn-container" class="w-full flex justify-center mb-6">
+            <!-- Google Sign-In button will render here -->
+        </div>
+
+        <div class="flex items-center gap-4 mb-6">
+            <div class="h-px bg-white/10 flex-grow"></div>
+            <span class="text-xs text-gray-500 font-bold uppercase tracking-widest">OR EMAIL</span>
+            <div class="h-px bg-white/10 flex-grow"></div>
+        </div>
+
+        <form id="register-form" class="space-y-4">
+            <div>
+                <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Username</label>
+                <input type="text" id="username" required class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-xl p-3 focus:outline-none focus:border-red-500/50 transition-colors" placeholder="e.g. venomslayer">
+            </div>
+            
+            <div>
+                <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Email</label>
+                <input type="email" id="email" required class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-xl p-3 focus:outline-none focus:border-red-500/50 transition-colors" placeholder="you@example.com">
+            </div>
+
+            <div id="password-group" class="hidden">
+                <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Password</label>
+                <input type="password" id="password" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-xl p-3 focus:outline-none focus:border-red-500/50 transition-colors" placeholder="••••••••">
+            </div>
+
+            <div id="otp-group" class="hidden">
+                <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Verification Code</label>
+                <input type="text" id="otp" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-xl p-3 focus:outline-none focus:border-emerald-500/50 transition-colors" placeholder="6-Digit Code">
+                <p class="text-[10px] text-gray-500 mt-2">Check your email for the code (also check spam).</p>
+            </div>
+
+            <div id="error-msg" class="text-red-500 text-xs font-bold text-center uppercase tracking-widest hidden"></div>
+            <div id="success-msg" class="text-emerald-500 text-xs font-bold text-center uppercase tracking-widest hidden"></div>
+
+            <button type="button" id="send-otp-btn" class="w-full bg-white text-black font-black uppercase tracking-widest text-sm p-4 rounded-xl hover:bg-gray-200 transition-colors">
+                Send Verification Code
+            </button>
+
+            <button type="submit" id="register-btn" class="w-full bg-emerald-500 text-black font-black uppercase tracking-widest text-sm p-4 rounded-xl hover:bg-emerald-400 transition-colors hidden">
+                Complete Registration
+            </button>
+        </form>
+
+        <div class="mt-8 text-center">
+            <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">
+                Already have an account? <a href="/login.html" class="text-white hover:text-red-500 transition-colors">Log In</a>
+            </p>
+        </div>
     </div>
 
-    <nav class="nav-glass fixed w-full top-0 z-50 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                <div class="flex-shrink-0 flex items-center">
-                    <a href="/index.html" class="flex items-center gap-3">
-                        <img src="/logo.png" alt="Logo" class="h-9">
-                        <span class="text-white font-bold text-lg tracking-[0.2em] uppercase pt-0.5">CAPEVERSE</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <main class="flex-grow flex items-center justify-center pt-28 pb-12 px-4 z-20 w-full">
-        <div class="glow-border w-full max-w-md">
-            <div class="glass-panel w-full p-8 relative flex flex-col gap-6 bg-[#0a0a0a]">
-                <div class="text-center">
-                    <h2 class="text-3xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-2">Create Account</h2>
-                    <p class="text-xs tracking-widest uppercase text-gray-500 font-semibold">Join Capeverse to start earning</p>
-                </div>
-
-                <div id="error-msg" class="hidden bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold uppercase tracking-widest p-3 rounded-lg text-center"></div>
-
-                <form id="register-form" class="flex flex-col gap-4">
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Username</label>
-                        <input type="text" id="username" required class="bg-black/50 border border-white/10 text-white rounded-xl p-3 focus:outline-none focus:border-red-500/50">
-                    </div>
-                    
-                    <div class="flex flex-col gap-1 mb-2">
-                        <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Password</label>
-                        <input type="password" id="password" required class="bg-black/50 border border-white/10 text-white rounded-xl p-3 focus:outline-none focus:border-red-500/50">
-                    </div>
-
-                    <button type="submit" class="bg-white text-black hover:bg-gray-200 font-bold py-3 px-6 rounded-xl tracking-wide uppercase text-xs transition-colors duration-300">
-                        Register
-                    </button>
-                </form>
-
-                <div class="text-center text-xs text-gray-500 uppercase tracking-widest font-semibold mt-2">
-                    Already have an account? <a href="/login.html" class="text-white hover:text-red-400 transition-colors">Login</a>
-                </div>
-            </div>
-        </div>
-    </main>
-
     <script>
-        document.getElementById('register-form').addEventListener('submit', async (e) => {
+        // Check config to init Google Auth
+        fetch('/api/config').then(res => res.json()).then(config => {
+            if (config.googleClientId) {
+                google.accounts.id.initialize({
+                    client_id: config.googleClientId,
+                    callback: handleGoogleLogin
+                });
+                google.accounts.id.renderButton(
+                    document.getElementById("google-btn-container"),
+                    { theme: "outline", size: "large", width: "100%", text: "signup_with" }
+                );
+            }
+        });
+
+        async function handleGoogleLogin(response) {
+            const res = await fetch('/api/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential: response.credential })
+            });
+            const data = await res.json();
+            if (data.success) {
+                localStorage.setItem('auth_token', data.token);
+                window.location.href = data.role === 'admin' ? '/admin.html' : '/claim.html';
+            } else {
+                document.getElementById('error-msg').innerText = data.error;
+                document.getElementById('error-msg').classList.remove('hidden');
+            }
+        }
+
+        const sendOtpBtn = document.getElementById('send-otp-btn');
+        const form = document.getElementById('register-form');
+        
+        sendOtpBtn.addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            if (!email) return alert('Enter email first');
+
+            sendOtpBtn.disabled = true;
+            sendOtpBtn.innerText = 'Sending...';
+
+            const res = await fetch('/api/auth/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                document.getElementById('success-msg').innerText = 'OTP Sent! Check your email.';
+                document.getElementById('success-msg').classList.remove('hidden');
+                document.getElementById('error-msg').classList.add('hidden');
+                
+                sendOtpBtn.classList.add('hidden');
+                document.getElementById('password-group').classList.remove('hidden');
+                document.getElementById('otp-group').classList.remove('hidden');
+                document.getElementById('register-btn').classList.remove('hidden');
+            } else {
+                sendOtpBtn.disabled = false;
+                sendOtpBtn.innerText = 'Send Verification Code';
+                document.getElementById('error-msg').innerText = data.error;
+                document.getElementById('error-msg').classList.remove('hidden');
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const errorMsg = document.getElementById('error-msg');
-            
-            try {
-                const res = await fetch('/api/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                
-                const data = await res.json();
-                
-                if (data.success) {
-                    alert('Registration successful! Please login.');
-                    window.location.href = '/login.html';
-                } else {
-                    errorMsg.innerText = data.error;
-                    errorMsg.classList.remove('hidden');
-                }
-            } catch (err) {
-                errorMsg.innerText = 'Network error. Try again.';
-                errorMsg.classList.remove('hidden');
+            const otp = document.getElementById('otp').value;
+
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password, otp })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                // Auto login or redirect
+                alert('Account created! Please log in.');
+                window.location.href = '/login.html';
+            } else {
+                document.getElementById('error-msg').innerText = data.error;
+                document.getElementById('error-msg').classList.remove('hidden');
             }
         });
     </script>
