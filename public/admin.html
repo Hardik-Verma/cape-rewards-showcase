@@ -25,7 +25,7 @@
         <div class="h-20 flex items-center justify-center border-b border-white/5">
             <a href="/index.html" class="flex items-center gap-3">
                 <img src="/logo.png" alt="Logo" class="h-8">
-                <span class="text-white font-black text-sm tracking-[0.2em] uppercase pt-0.5">ADMIN</span>
+                <span class="text-white font-black text-sm tracking-widest sm:tracking-[0.2em] uppercase pt-0.5">ADMIN</span>
             </a>
         </div>
         <nav class="flex-grow p-4 space-y-2">
@@ -65,7 +65,7 @@
                         <tbody id="users-table-body" class="divide-y divide-white/5">
                             <!-- JS populated -->
                         </tbody>
-                    </table>
+                    </table></div>
                 </div>
             </div>
 
@@ -89,7 +89,7 @@
                         <tbody id="items-table-body" class="divide-y divide-white/5">
                             <!-- JS populated -->
                         </tbody>
-                    </table>
+                    </table></div>
                 </div>
             </div>
 
@@ -100,7 +100,7 @@
 
     <!-- Edit User Modal -->
     <div id="user-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm">
-        <div class="glass-panel w-full max-w-md rounded-2xl p-8 relative">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-5 sm:p-8 relative">
             <button onclick="closeModals()" class="absolute top-4 right-4 text-gray-500 hover:text-white">&times;</button>
             <h3 class="text-lg font-black text-white mb-6 uppercase tracking-widest">Edit User</h3>
             
@@ -123,7 +123,7 @@
 
     <!-- Edit Item Modal -->
     <div id="item-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm">
-        <div class="glass-panel w-full max-w-md rounded-2xl p-8 relative">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-5 sm:p-8 relative">
             <button onclick="closeModals()" class="absolute top-4 right-4 text-gray-500 hover:text-white">&times;</button>
             <h3 class="text-lg font-black text-white mb-6 uppercase tracking-widest" id="item-modal-title">Add Item</h3>
             
@@ -152,7 +152,7 @@
                 </div>
                 <div>
                     <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Image URL (Hosted via ImgBB)</label>
-                    <div class="flex gap-2 items-center">
+                    <div class="flex flex-wrap gap-2 items-center">
                         <input type="text" id="item-image" class="flex-grow bg-black/50 border border-white/10 text-white text-sm rounded-lg p-2" placeholder="https://i.ibb.co/...">
                         <label class="cursor-pointer bg-blue-500/20 text-blue-400 hover:bg-blue-500 hover:text-white border border-blue-500/50 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors whitespace-nowrap">
                             Upload
