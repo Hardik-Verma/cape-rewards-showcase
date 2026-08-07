@@ -98,22 +98,31 @@
     </div>
 
     <script>
-        function initGoogleAuth() {
-            if (!window.GOOGLE_CLIENT_ID) return;
-            const init = () => {
-                google.accounts.id.initialize({
-                    client_id: window.GOOGLE_CLIENT_ID,
-                    callback: handleGoogleLogin
-                });
-                google.accounts.id.renderButton(
-                    document.getElementById("google-btn-container"),
-                    { theme: "filled_black", size: "large", text: "signup_with" }
-                );
-            };
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else {
-                init();
+        async function initGoogleAuth() {
+            try {
+                const res = await fetch('/api/config');
+                const data = await res.json();
+                const clientId = data.googleClientId;
+                if (!clientId) return;
+
+                const init = () => {
+                    google.accounts.id.initialize({
+                        client_id: clientId,
+                        callback: handleGoogleLogin
+                    });
+                    google.accounts.id.renderButton(
+                        document.getElementById("google-btn-container"),
+                        { theme: "filled_black", size: "large", text: "signup_with" }
+                    );
+                };
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', init);
+                } else {
+                    init();
+                }
+            } catch (err) {
+                console.error('Google Auth Init Error:', err);
             }
         }
 
@@ -263,8 +272,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const isAuth = !!localStorage.getItem('auth_token');
-            document.querySelectorAll('.auth-hidden').forEach(el => { el.style.display = isAuth ? 'none' : 'block'; });
-            document.querySelectorAll('.auth-visible').forEach(el => { el.style.display = isAuth ? 'block' : 'none'; el.classList.remove('hidden'); });
+            document.querySelectorAll('.auth-hidden').forEach(el => el.classList.toggle('hidden', isAuth));
+            document.querySelectorAll('.auth-visible').forEach(el => el.classList.toggle('hidden', !isAuth));
         });
         if (typeof logout === 'undefined') {
             window.logout = function() {

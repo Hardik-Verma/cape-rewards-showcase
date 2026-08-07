@@ -441,8 +441,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const isAuth = !!localStorage.getItem('auth_token');
-            document.querySelectorAll('.auth-hidden').forEach(el => { el.style.display = isAuth ? 'none' : 'block'; });
-            document.querySelectorAll('.auth-visible').forEach(el => { el.style.display = isAuth ? 'block' : 'none'; el.classList.remove('hidden'); });
+            document.querySelectorAll('.auth-hidden').forEach(el => el.classList.toggle('hidden', isAuth));
+            document.querySelectorAll('.auth-visible').forEach(el => el.classList.toggle('hidden', !isAuth));
         });
         if (typeof logout === 'undefined') {
             window.logout = function() {
