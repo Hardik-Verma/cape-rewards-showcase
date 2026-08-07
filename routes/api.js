@@ -4,22 +4,9 @@ const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { User, Item, VerificationCode, Order } = require('../database/db');
-const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
-
 const JWT_SECRET = process.env.JWT_SECRET || 'capeverse-super-secret-key';
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.SMTP_EMAIL,
-        pass: process.env.SMTP_PASSWORD
-    },
-    connectionTimeout: 10000, // 10 seconds to fail fast
-    greetingTimeout: 10000,
-    socketTimeout: 10000
-});
 
 // Secure config for frontend
 router.get('/config', (req, res) => {
@@ -105,20 +92,36 @@ router.post('/auth/send-otp', async (req, res) => {
             { upsert: true, new: true }
         );
 
-        if (!process.env.SMTP_EMAIL) {
+        if (!process.env.BREVO_API_KEY) {
             console.log(`[MOCK EMAIL] OTP for ${email} is ${code}`);
             return res.json({ success: true, message: 'Check console for mock OTP' });
         }
 
-        transporter.sendMail({
-            from: process.env.SMTP_EMAIL,
-            to: email,
-            subject: 'Capeverse Verification Code',
-            text: `Your verification code is: ${code}`
-        }, (error) => {
-            if (error) return res.status(500).json({ error: 'Failed to send email' });
-            res.json({ success: true, message: 'OTP sent' });
+        const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: {
+                    name: 'Capeverse',
+                    email: process.env.SENDER_EMAIL || 'capeverse.noreply@gmail.com'
+                },
+                to: [{ email: email }],
+                subject: 'Capeverse Verification Code',
+                htmlContent: `<p>Your verification code is: <strong>${code}</strong></p><p>This code expires in 15 minutes.</p>`
+            })
         });
+
+        if (brevoRes.ok) {
+            res.json({ success: true, message: 'OTP sent' });
+        } else {
+            const errData = await brevoRes.json();
+            console.error('Brevo Error:', errData);
+            res.status(500).json({ error: 'Failed to send email via API' });
+        }
     } catch (e) {
         res.status(500).json({ error: 'Database error' });
     }
