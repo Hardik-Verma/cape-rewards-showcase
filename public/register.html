@@ -99,7 +99,8 @@
 
     <script>
         function initGoogleAuth() {
-            if (window.GOOGLE_CLIENT_ID) {
+            if (!window.GOOGLE_CLIENT_ID) return;
+            const init = () => {
                 google.accounts.id.initialize({
                     client_id: window.GOOGLE_CLIENT_ID,
                     callback: handleGoogleLogin
@@ -108,6 +109,11 @@
                     document.getElementById("google-btn-container"),
                     { theme: "filled_black", size: "large", text: "signup_with" }
                 );
+            };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
             }
         }
 
