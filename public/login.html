@@ -75,7 +75,7 @@
 
         <div class="mt-8 text-center">
             <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">
-                Don't have an account? <a href="/register.html" class="text-white hover:text-red-500 transition-colors">Sign Up</a>
+                Want to earn a cape? <a href="/register.html" class="text-red-500 hover:text-red-400 transition-colors font-black underline underline-offset-4">Sign up here</a>
             </p>
         </div>
     </div>
@@ -171,19 +171,8 @@
         });
     </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const isAuth = !!localStorage.getItem('auth_token');
-            document.querySelectorAll('.auth-hidden').forEach(el => el.classList.toggle('hidden', isAuth));
-            document.querySelectorAll('.auth-visible').forEach(el => el.classList.toggle('hidden', !isAuth));
-        });
-        if (typeof logout === 'undefined') {
-            window.logout = function() {
-                localStorage.removeItem('auth_token');
-                window.location.href = '/login.html';
-            }
-        }
-    </script>
+    
 
+    <script src="/auth.js"></script>
 </body>
 </html>

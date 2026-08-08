@@ -136,12 +136,12 @@
                             About
                             <span class="absolute left-0 bottom-0 w-0 h-[1px] bg-red-600 transition-all duration-300 ease-out group-hover:w-full "></span>
                         </a>
-                        <a href="/claim.html" class="auth-visible hidden relative group text-gray-500 hover:text-white px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase ">
+                        <a href="/claim.html" class="relative group text-gray-500 hover:text-white px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase ">
                             Claim
                             <span class="absolute left-0 bottom-0 w-0 h-[1px] bg-red-600 transition-all duration-300 ease-out group-hover:w-full "></span>
                         </a>
-                        <a href="/history.html" class="auth-visible hidden relative group text-gray-500 hover:text-white px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase ">
-                            History
+                        <a href="/history.html" class="relative group text-gray-500 hover:text-white px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase ">
+                            Orders
                             <span class="absolute left-0 bottom-0 w-0 h-[1px] bg-red-600 transition-all duration-300 ease-out group-hover:w-full "></span>
                         </a>
                         <a href="/support.html" class="relative group text-gray-500 hover:text-white px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase ">
@@ -172,8 +172,8 @@
             <div class="px-4 pt-2 pb-6 space-y-1">
                 <a href="/index.html" class="block px-4 py-3 text-xs font-semibold text-gray-400 tracking-widest uppercase hover:text-white hover:bg-white/5 rounded-md transition-colors">Home</a>
                 <a href="/about.html" class="block px-4 py-3 text-xs font-semibold text-gray-400 tracking-widest uppercase hover:text-white hover:bg-white/5 rounded-md transition-colors">About</a>
-                <a href="/claim.html" class="auth-visible hidden block px-4 py-3 text-xs font-semibold text-gray-400 tracking-widest uppercase hover:text-white hover:bg-white/5 rounded-md transition-colors">Claim</a>
-                <a href="/history.html" class="auth-visible hidden block px-4 py-3 text-xs font-semibold text-gray-400 tracking-widest uppercase hover:text-white hover:bg-white/5 rounded-md transition-colors">History</a>
+                <a href="/claim.html" class="block px-4 py-3 text-xs font-semibold text-gray-400 tracking-widest uppercase hover:text-white hover:bg-white/5 rounded-md transition-colors">Claim</a>
+                <a href="/history.html" class="block px-4 py-3 text-xs font-semibold text-gray-400 tracking-widest uppercase hover:text-white hover:bg-white/5 rounded-md transition-colors">Orders</a>
                 <a href="/support.html" class="block px-4 py-3 text-xs font-semibold text-gray-400 tracking-widest uppercase hover:text-white hover:bg-white/5 rounded-md transition-colors">Support</a>
                 <a href="/login.html" class="auth-hidden block px-4 py-3 text-xs font-semibold text-emerald-500 tracking-widest uppercase hover:text-emerald-400 hover:bg-white/5 rounded-md transition-colors">Login</a>
                 <button onclick="logout()" class="auth-visible hidden block w-full text-left px-4 py-3 text-xs font-semibold text-red-500 tracking-widest uppercase hover:text-red-400 hover:bg-white/5 rounded-md transition-colors">Logout</button>
@@ -221,14 +221,14 @@
             <!-- Intro Hero (Fades out immediately on scroll) -->
             <div class="detail-panel panel-center" id="intro-hero" style="opacity: 1; transform: translate(-50%, -50%);">
                 <h1 class="text-4xl sm:text-6xl md:text-8xl font-black uppercase tracking-widest text-white mb-2 whitespace-nowrap">Capeverse</h1>
-                <div class="text-xs uppercase tracking-[0.4em] text-gray-400 mb-8">Scroll To Unlock</div>
+                
                 
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-                    <a href="/preview.html" onclick="transitionToClaim(event)" class="px-8 py-3 bg-white text-black rounded-full text-xs font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all pointer-events-auto shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(220,38,38,0.4)]">
-                        Preview Rewards
+                    <a href="/preview.html" onclick="transitionToClaim(event)" class="px-12 py-4 bg-white text-black rounded-full text-xs font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all pointer-events-auto shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(220,38,38,0.4)]">
+                        EARN REWARDS
                     </a>
-                    <button onclick="openAutoPlayModal()" class="px-8 py-3 bg-white/5 border border-white/10 rounded-full text-xs font-bold uppercase tracking-widest text-white hover:bg-white/10 hover:border-red-500 transition-all pointer-events-auto">
+                    <button onclick="openAutoPlayModal()" class="px-12 py-4 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-white hover:bg-white/10 hover:border-red-500 transition-all pointer-events-auto">
                         Auto-Play Experience
                     </button>
                 </div>
@@ -711,45 +711,8 @@
                 });
             }
 
-            // Dynamic Auth UI
-            const authToken = localStorage.getItem('auth_token');
-            if (authToken) {
-                // Change 'Preview' links to 'Dashboard' and link to /claim.html
-                document.querySelectorAll('a[href="/preview.html"]').forEach(el => {
-                    el.href = '/claim.html';
-                    if (el.innerText.includes('Preview Rewards')) {
-                        el.innerText = 'Go to Dashboard';
-                    } else if (el.innerText.includes('Preview')) {
-                        el.innerText = 'Dashboard';
-                    }
-                    // Retain inner spans/classes by just swapping text node if needed, 
-                    // but since they are simple links we can just replace text and href
-                });
-                
-                // Add Logout to Desktop Nav
-                const desktopNav = document.querySelector('.hidden.md\\:flex .ml-10');
-                if (desktopNav) {
-                    const logoutBtn = document.createElement('button');
-                    logoutBtn.onclick = () => { localStorage.removeItem('auth_token'); window.location.reload(); };
-                    logoutBtn.className = 'relative group text-red-500 hover:text-red-400 px-2 py-2 text-xs font-semibold transition-colors tracking-widest uppercase';
-                    logoutBtn.innerText = 'Logout';
-                    
-                    // Insert before the Discord icon (which is the last child)
-                    desktopNav.insertBefore(logoutBtn, desktopNav.lastElementChild);
-                }
-
-                // Add Logout to Mobile Nav
-                const mobileNavContainer = document.querySelector('#mobile-menu .px-4');
-                if (mobileNavContainer) {
-                    const logoutBtn = document.createElement('button');
-                    logoutBtn.onclick = () => { localStorage.removeItem('auth_token'); window.location.reload(); };
-                    logoutBtn.className = 'w-full text-left block px-4 py-3 text-xs font-semibold text-red-500 tracking-widest uppercase hover:text-red-400 hover:bg-white/5 rounded-md transition-colors';
-                    logoutBtn.innerText = 'Logout';
-                    
-                    mobileNavContainer.insertBefore(logoutBtn, mobileNavContainer.lastElementChild);
-                }
-            }
-        });
+            });
     </script>
+    <script src="/auth.js"></script>
 </body>
 </html>
