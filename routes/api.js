@@ -447,29 +447,38 @@ router.post('/admin/users/:id/role', authenticateAdmin, async (req, res) => {
 });
 
 // --- CPA ENDPOINTS ---
-router.get('/postback', async (req, res) => {
-    const { user_id, secret, reward } = req.query;
+router.all('/postback', async (req, res) => {
+    const params = { ...req.query, ...req.body };
+    const userId = params.user_id || params.uid || params.subId || params.sub_id || params.subid || params.user;
+    const secret = params.secret || params.key;
+    const reward = params.reward || params.payout || params.points || params.amount;
+
     const expectedSecret = process.env.BITCOTASKS_SECRET;
     if (expectedSecret && secret !== expectedSecret) return res.status(401).json({ error: 'Unauthorized' });
-    if (!user_id) return res.status(400).json({ error: 'Missing user_id' });
+    if (!userId) return res.status(400).json({ error: 'Missing user_id parameter' });
     const rewardAmount = parseInt(reward) || 150;
     
     try {
-        await User.findByIdAndUpdate(user_id, { $inc: { balance: rewardAmount } });
-        res.status(200).json({ success: true });
+        const user = await User.findByIdAndUpdate(userId, { $inc: { balance: rewardAmount } });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.status(200).json({ success: true, message: `Granted ${rewardAmount} points` });
     } catch (e) {
-        res.status(500).json({ error: 'Error' });
+        res.status(500).json({ error: 'Error updating balance' });
     }
 });
 
-router.get('/test-postback', async (req, res) => {
-    const { user_id, reward } = req.query;
-    if (!user_id) return res.status(400).json({ error: 'Missing user_id' });
+router.all('/test-postback', async (req, res) => {
+    const params = { ...req.query, ...req.body };
+    const userId = params.user_id || params.uid || params.subId || params.sub_id || params.subid || params.user;
+    const reward = params.reward || params.payout || params.points || params.amount;
+
+    if (!userId) return res.status(400).json({ error: 'Missing user_id' });
     const rewardAmount = parseInt(reward) || 150;
     
     try {
-        await User.findByIdAndUpdate(user_id, { $inc: { balance: rewardAmount } });
-        res.status(200).json({ success: true });
+        const user = await User.findByIdAndUpdate(userId, { $inc: { balance: rewardAmount } });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.status(200).json({ success: true, message: `Test granted ${rewardAmount} points` });
     } catch (e) {
         res.status(500).json({ error: 'Error' });
     }

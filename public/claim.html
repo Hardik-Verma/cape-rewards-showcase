@@ -353,20 +353,44 @@
         const offersGrid = document.getElementById('offers-grid');
         
         async function initOffers() {
-            // TESTING OVERRIDE: Always use placeholder.html to simulate surveys
-            let offerLink = "/placeholder.html?user_id=" + currentUser.id;
-            // try {
-            //     const res = await fetch('/api/config');
-            //     const data = await res.json();
-            //     if (data.cpaUrl && data.cpaUrl.trim() !== '') {
-            //         offerLink = data.cpaUrl + currentUser.id;
-            //     }
-            // } catch(e) {}
+            let baseCpaUrl = '';
+            try {
+                const res = await fetch('/api/config');
+                const data = await res.json();
+                if (data.cpaUrl && data.cpaUrl.trim() !== '') {
+                    baseCpaUrl = data.cpaUrl.trim();
+                }
+            } catch(e) {
+                console.error('Failed to fetch config:', e);
+            }
             
+            if (!baseCpaUrl) {
+                offersGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12 bg-[#0a0a0a] border border-white/5 rounded-2xl p-6">
+                        <div class="text-yellow-500 font-bold text-base mb-2">Bitcotasks URL Not Configured</div>
+                        <p class="text-gray-400 text-xs max-w-md mx-auto mb-4">Set <code class="text-white bg-white/10 px-2 py-1 rounded">BITCOTASKS_URL</code> in your server <code class="text-white bg-white/10 px-2 py-1 rounded">.env</code> file with your Bitcotasks Offerwall link.</p>
+                        <p class="text-gray-500 text-[11px]">Example: <code class="text-gray-300">BITCOTASKS_URL=https://bitcotasks.com/offerwall/YOUR_OFFERWALL_ID/</code></p>
+                    </div>
+                `;
+                return;
+            }
+
             offersGrid.innerHTML = CONFIG.offers.map(o => {
-                const finalLink = offerLink.includes('?') ? `${offerLink}&reward=${o.reward}` : `${offerLink}?reward=${o.reward}`;
+                let offerUrl = baseCpaUrl;
+
+                if (offerUrl.includes('{uid}') || offerUrl.includes('{user_id}') || offerUrl.includes('[subid]') || offerUrl.includes('[user_id]')) {
+                    offerUrl = offerUrl.replace(/\{uid\}|\{user_id\}|\[subid\]|\[user_id\]/g, currentUser.id);
+                } else if (!offerUrl.includes(currentUser.id)) {
+                    if (offerUrl.endsWith('=') || offerUrl.endsWith('/')) {
+                        offerUrl = offerUrl + currentUser.id;
+                    } else {
+                        const sep = offerUrl.includes('?') ? '&' : '?';
+                        offerUrl = `${offerUrl}${sep}user_id=${currentUser.id}`;
+                    }
+                }
+
                 return `
-                <a href="${finalLink}" class="bg-[#0a0a0a] border border-white/5 hover:border-red-500/50 rounded-xl p-4 cursor-pointer transition-all hover:bg-white/5 text-center flex flex-col items-center gap-2 group block">
+                <a href="${offerUrl}" target="_blank" rel="noopener noreferrer" class="bg-[#0a0a0a] border border-white/5 hover:border-red-500/50 rounded-xl p-4 cursor-pointer transition-all hover:bg-white/5 text-center flex flex-col items-center gap-2 group block">
                     <div class="text-[10px] text-gray-500 font-semibold flex items-center gap-1 uppercase tracking-widest">
                         <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         ${o.time}
