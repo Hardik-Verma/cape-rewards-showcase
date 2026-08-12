@@ -10,9 +10,10 @@ If `git pull` or `git commit` doesn't work, you need to set up Git:
 
 ### STEP 1: UPDATE YOUR CODE
 1. Open your terminal in your project folder.
-2. Pull the latest updates:
+2. Pull the latest updates from GitHub:
    `git pull`
-   (Or download the new ZIP from GitHub and replace your local files).
+   *(This downloads the latest changes I made and merges them into your files).*
+   (If you get an error, download the new ZIP from GitHub and replace your local files).
 
 ### STEP 2: UPDATE YOUR .ENV & RENDER
 Open your `.env` file and **UPDATE** the names of these keys:
