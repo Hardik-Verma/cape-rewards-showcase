@@ -1,79 +1,49 @@
-THE COMPLETE CAPEVERSE DEPLOYMENT GUIDE
+# CAPEVERSE UPDATE GUIDE (v2)
 
-### STEP 1: PREPARE THE FILES
-1. Extract the project folder on your computer.
-2. Open your terminal (or Command Prompt) inside that folder.
-3. Run this command to install all the dependencies: `npm install`
+You already have the app deployed! This guide is to update your code to the latest version.
 
-### STEP 2: CREATE YOUR GITHUB REPOSITORY
-1. Go to GitHub.com and log in.
-2. Click the "+" icon in the top right and select "New repository".
-3. Name it `capeverse-backend`.
-4. Select "Private" so your code is secure, and click "Create repository".
-5. In your terminal (inside the project folder), run these commands one by one to upload the code:
-   - `git init`
-   - `git add .`
-   - `git commit -m "Initial commit"`
-   - `git branch -M main`
-   - `git remote add origin https://github.com/YOUR_GITHUB_USERNAME/capeverse-backend.git` (REPLACE with your actual link)
-   - `git push -u origin main`
+### STEP 1: UPDATE YOUR CODE
+Since you have already cloned the repository and set up Render:
+1. Open your terminal in your project folder.
+2. Pull the latest updates:
+   `git pull`
+3. (If you aren't using git to pull): Download the latest ZIP from your GitHub repository, extract it, and replace your local files.
 
-### STEP 3: DISCORD BOT SETUP
-1. Go to the Discord Developer Portal.
-2. Click "New Application" and name it `Capeverse`.
-3. Go to the **Bot** tab. Reset your Token and copy it.
-4. Scroll down on the Bot page and turn **ON** all three Privileged Gateway Intents (Presence, Server Members, Message Content).
-5. Go to **OAuth2** -> **General** to find your Client ID.
+### STEP 2: UPDATE YOUR .ENV FILE
+Open your `.env` file and make these exact changes:
+1. **REMOVE** `CPA_NETWORK_URL`
+2. **ADD** `BITCOTASKS_URL` (Set this to your Bitcotasks offerwall URL).
+3. **ADD** `MONGODB_URI` (Your MongoDB connection string).
+4. **ENSURE** all other keys (`BREVO_API_KEY`, `IMGBB_API_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `JWT_SECRET`) are filled in. The app requires them to work.
 
-### STEP 4: SETUP YOUR .ENV (CRITICAL)
-Create a file named `.env` in the root folder and add the following keys. **Do not use both BITCOTASKS_URL and CPA_NETWORK_URL—only use BITCOTASKS_URL.**
-
+**Your .env should look like this:**
 ```text
-# Server
-PORT=3000
-MONGODB_URI=your_mongodb_connection_string
+# Discord & Base Config
+DISCORD_TOKEN=
+DISCORD_CLIENT_ID=
+DISCORD_GUILD_ID=
+BASE_URL=
 
-# Discord Bot
-DISCORD_TOKEN=your_bot_token
-CLIENT_ID=your_client_id
-GUILD_ID=your_guild_id
-REWARD_ROLE_ID=your_reward_role_id
+# Database & Offerwall (REQUIRED)
+MONGODB_URI=
+BITCOTASKS_URL=
+POSTBACK_SECRET=
 
-# Security
-POSTBACK_SECRET=CapeRewards_Secure_8xQw2pL5
-BITCOTASKS_URL=your_bitcotasks_offerwall_url
-
-# Optional (for email/images)
+# Required Services
 BREVO_API_KEY=
 IMGBB_API_KEY=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
-JWT_SECRET=a_long_random_string
+JWT_SECRET=
+PORT=3000
 ```
 
-### STEP 5: DEPLOY DISCORD COMMANDS
-To install the `/survey` command into your Discord server, run this in your terminal:
-`node bot/deploy-commands.js`
-(You should see a success message saying the commands were refreshed!)
-
-### STEP 6: FINAL DEPLOYMENT ON RENDER.COM
-1. Go to Render.com and create an account.
-2. Click "New +" -> "Web Service".
-3. Connect your GitHub account and select your `capeverse-backend` repository.
-4. Set the following:
-   - **Runtime:** Node
-   - **Build Command:** `npm install`
-   - **Start Command:** `npm start`
-5. Click "Advanced" -> "Environment Variables".
-6. Add ALL the variables from your `.env` file (e.g., `BITCOTASKS_URL`, `MONGODB_URI`, `DISCORD_TOKEN`, etc.).
-7. Click "Create Web Service".
-
----
-
-### IMPORTANT: KEEPING IT 24/7
-Render's free tier sleeps after inactivity. 
-1. Go to [UptimeRobot.com](https://uptimerobot.com/).
-2. Create an account.
-3. Click "New Monitor" -> HTTP(s).
-4. Paste your Render URL (from the Render dashboard) followed by `/api/config` (e.g., `https://your-site.onrender.com/api/config`).
-5. Set it to ping every 5 minutes. This keeps your bot and site online 24/7!
+### STEP 3: COMMIT & DEPLOY
+Since you already have a repository:
+1. Open your terminal in the project folder.
+2. Run these commands:
+   `git add .`
+   `git commit -m "Update: responsiveness and history management"`
+   `git push`
+3. Go to **Render.com** -> Your Web Service -> Environment -> Ensure `BITCOTASKS_URL` and `MONGODB_URI` are added there too!
+4. Render will automatically redeploy the new code.

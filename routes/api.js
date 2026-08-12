@@ -471,7 +471,7 @@ router.all('/postback', async (req, res) => {
     const secret = params.secret || params.key;
     const reward = params.reward || params.payout || params.points || params.amount;
 
-    const expectedSecret = process.env.BITCOTASKS_SECRET;
+    const expectedSecret = process.env.POSTBACK_SECRET;
     if (expectedSecret && secret !== expectedSecret) return res.status(401).json({ error: 'Unauthorized' });
     if (!userId) return res.status(400).json({ error: 'Missing user_id parameter' });
     const rewardAmount = parseInt(reward) || 150;
