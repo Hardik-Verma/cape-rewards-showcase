@@ -396,8 +396,26 @@ router.post('/cashout', authenticateToken, async (req, res) => {
 router.get('/history', authenticateToken, async (req, res) => {
     try {
         const rows = await Order.find({ user_id: req.user.id }).sort({ timestamp: -1 });
-        const history = rows.map(r => ({ name: r.name, token: r.token, points: r.points, timestamp: r.timestamp, date: new Date(r.timestamp).toLocaleDateString() }));
+        const history = rows.map(r => ({ id: r._id, name: r.name, token: r.token, points: r.points, timestamp: r.timestamp, date: new Date(r.timestamp).toLocaleDateString() }));
         res.json({ success: true, history });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+router.delete('/history/:id', authenticateToken, async (req, res) => {
+    try {
+        await Order.deleteOne({ _id: req.params.id, user_id: req.user.id });
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+router.delete('/history', authenticateToken, async (req, res) => {
+    try {
+        await Order.deleteMany({ user_id: req.user.id });
+        res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: 'Database error' });
     }

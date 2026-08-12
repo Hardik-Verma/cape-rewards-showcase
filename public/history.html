@@ -127,6 +127,9 @@
                     <p class="text-sm tracking-widest uppercase text-gray-500 font-semibold">View and manage your past rewards.</p>
                 </div>
             </div>
+            <button onclick="deleteAllOrders()" class="bg-red-900/30 hover:bg-red-600 text-red-500 hover:text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all border border-red-900/50 hover:border-red-500">
+                Delete All History
+            </button>
         </div>
 
         <div class="w-full glow-border mb-8">
@@ -202,7 +205,43 @@
         
         let serverHistory = [];
 
-        
+        async function deleteOrder(id) {
+            if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) return;
+            
+            try {
+                const res = await fetch(`/api/history/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    fetchHistory();
+                } else {
+                    alert('Failed to delete order.');
+                }
+            } catch (e) {
+                alert('Error deleting order.');
+            }
+        }
+
+        async function deleteAllOrders() {
+            if (!confirm('WARNING: Are you sure you want to delete ALL order history? This action cannot be undone!')) return;
+            
+            try {
+                const res = await fetch('/api/history', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    fetchHistory();
+                } else {
+                    alert('Failed to delete history.');
+                }
+            } catch (e) {
+                alert('Error deleting history.');
+            }
+        }
 
         function copyKey(btnElement, textToCopy) {
             let text = textToCopy;
@@ -333,10 +372,16 @@
                         <span class="text-[10px] text-gray-600 uppercase font-bold tracking-widest">Reward Token</span>
                         <div class="flex items-center justify-between gap-3 bg-black/50 border border-white/10 px-4 py-3 rounded-xl w-full md:w-auto overflow-hidden">
                             <code class="text-emerald-400 font-mono text-sm select-all tracking-wider break-all min-w-0">${item.token}</code>
-                            <button onclick="copyKey(this, '${item.token}')" class="p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-colors flex-shrink-0 flex items-center justify-center" title="Copy">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                            </button>
+                            <div class="flex items-center gap-1">
+                                <button onclick="copyKey(this, '${item.token}')" class="p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-colors flex-shrink-0 flex items-center justify-center" title="Copy">
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                </button>
+                                <button onclick="deleteOrder('${item.id}')" class="p-2 bg-red-900/20 hover:bg-red-900/50 text-red-500 hover:text-red-300 rounded-lg transition-colors flex-shrink-0 flex items-center justify-center" title="Delete Order">
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
                         </div>
+                    </div>
                     </div>
                 </div>
             `).join('');
