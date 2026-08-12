@@ -464,7 +464,7 @@ router.post('/admin/users/:id/role', authenticateAdmin, async (req, res) => {
     }
 });
 
-// --- CPA ENDPOINTS ---
+// --- SURVEY ENDPOINTS ---
 router.all('/postback', async (req, res) => {
     const params = { ...req.query, ...req.body };
     const userId = params.user_id || params.uid || params.subId || params.sub_id || params.subid || params.user;
