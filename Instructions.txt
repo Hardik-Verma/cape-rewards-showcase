@@ -3,31 +3,25 @@
 You already have the app deployed! This guide is to update your code to the latest version.
 
 ### STEP 1: UPDATE YOUR CODE
-Since you have already cloned the repository and set up Render:
 1. Open your terminal in your project folder.
 2. Pull the latest updates:
    `git pull`
-3. (If you aren't using git to pull): Download the latest ZIP from your GitHub repository, extract it, and replace your local files.
+   (If you get an error, download the new ZIP from GitHub and replace your local files).
 
 ### STEP 2: UPDATE YOUR .ENV FILE
-Open your `.env` file and make these exact changes:
-1. **REMOVE** `CPA_NETWORK_URL`
-2. **ADD** `BITCOTASKS_URL` (Set this to your Bitcotasks offerwall URL).
-3. **ADD** `MONGODB_URI` (Your MongoDB connection string).
-4. **ENSURE** all other keys (`BREVO_API_KEY`, `IMGBB_API_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `JWT_SECRET`) are filled in. The app requires them to work.
+Open your `.env` file and verify these keys. Do **NOT** remove `REWARD_ROLE_ID`.
 
-**Your .env should look like this:**
 ```text
 # Discord & Base Config
 DISCORD_TOKEN=
-DISCORD_CLIENT_ID=
-DISCORD_GUILD_ID=
-BASE_URL=
+CLIENT_ID=
+GUILD_ID=
+REWARD_ROLE_ID=
 
 # Database & Offerwall (REQUIRED)
 MONGODB_URI=
 BITCOTASKS_URL=
-POSTBACK_SECRET=
+POSTBACK_SECRET=CapeRewards_Secure_8xQw2pL5
 
 # Required Services
 BREVO_API_KEY=
@@ -37,13 +31,13 @@ GOOGLE_CLIENT_SECRET=
 JWT_SECRET=
 PORT=3000
 ```
+*(Note: `BASE_URL`, `DISCORD_CLIENT_ID`, and `DISCORD_GUILD_ID` are no longer required; just use the ones listed above).*
 
 ### STEP 3: COMMIT & DEPLOY
-Since you already have a repository:
 1. Open your terminal in the project folder.
 2. Run these commands:
    `git add .`
    `git commit -m "Update: responsiveness and history management"`
    `git push`
-3. Go to **Render.com** -> Your Web Service -> Environment -> Ensure `BITCOTASKS_URL` and `MONGODB_URI` are added there too!
+3. Go to **Render.com** -> Your Web Service -> Environment -> Update your variables to match the new list above.
 4. Render will automatically redeploy the new code.
