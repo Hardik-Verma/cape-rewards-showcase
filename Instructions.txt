@@ -1,6 +1,12 @@
 # CAPEVERSE UPDATE GUIDE (v3)
 
-You already have the app deployed! This guide is to update your code to the latest version.
+### STEP 0: SET UP GIT (If you haven't yet)
+If `git pull` or `git commit` doesn't work, you need to set up Git:
+1. **Download Git:** Go to [git-scm.com](https://git-scm.com/) and install it.
+2. **Configure Your Identity:** Open your terminal in the project folder and run these two commands (replace with your info):
+   `git config --global user.name "Your Name"`
+   `git config --global user.email "your.email@example.com"`
+3. **Now you can use Git commands!**
 
 ### STEP 1: UPDATE YOUR CODE
 1. Open your terminal in your project folder.
@@ -41,7 +47,7 @@ PORT=3000
 1. Open your terminal in the project folder.
 2. Run these commands:
    `git add .`
-   `git commit -m "Update: unify Discord env variable names"`
+   `git commit -m "Update: responsiveness and history management"`
    `git push`
 3. Render will automatically redeploy. 
 4. **IMPORTANT**: If the bot doesn't start, double-check that you renamed the variables on the Render Dashboard Environment tab.
