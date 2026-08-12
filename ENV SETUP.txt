@@ -1,0 +1,20 @@
+# CAPEVERSE: .ENV SETUP GUIDE
+
+This guide explains how to get the values for your `.env` file. Keep this file secure and NEVER share it publicly.
+
+### 1. DISCORD VALUES
+*   **DISCORD_TOKEN**: Go to [Discord Developer Portal](https://discord.com/developers/applications), select your App -> **Bot** -> Reset Token.
+*   **DISCORD_CLIENT_ID**: Go to your App -> **General Information** -> Application ID.
+*   **DISCORD_GUILD_ID**: Right-click your Discord server icon in Discord and select **Copy Server ID** (Requires Developer Mode enabled in Discord Settings).
+*   **REWARD_ROLE_ID**: Right-click the role you want to grant in Discord Server Settings -> Roles and select **Copy Role ID**.
+
+### 2. DATABASE & OFFERWALL
+*   **MONGODB_URI**: Sign up at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas), create a free cluster, click "Connect" -> "Drivers", and copy the connection string. Replace `<password>` with your database user password.
+*   **BITCOTASKS_URL**: Your specific offerwall link provided by Bitcotasks (must be formatted correctly).
+*   **POSTBACK_SECRET**: A random, strong password you create (e.g., `MySuperSecretPassword123`).
+
+### 3. REQUIRED SERVICES
+*   **BREVO_API_KEY**: Sign up at [Brevo](https://www.brevo.com/), go to API Keys, and generate a new V3 key.
+*   **IMGBB_API_KEY**: Go to [ImgBB](https://api.imgbb.com/), get a free API key for image hosting.
+*   **GOOGLE_CLIENT_ID & SECRET**: Go to [Google Cloud Console](https://console.cloud.google.com/), create a project, set up "OAuth consent screen", create "OAuth client ID" credentials (Web application), and copy the ID and Secret.
+*   **JWT_SECRET**: Any long, random, secure string (e.g., `random_string_123456789`).

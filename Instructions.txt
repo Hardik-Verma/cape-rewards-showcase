@@ -1,4 +1,4 @@
-# CAPEVERSE UPDATE GUIDE (v2)
+# CAPEVERSE UPDATE GUIDE (v3)
 
 You already have the app deployed! This guide is to update your code to the latest version.
 
@@ -6,16 +6,21 @@ You already have the app deployed! This guide is to update your code to the late
 1. Open your terminal in your project folder.
 2. Pull the latest updates:
    `git pull`
-   (If you get an error, download the new ZIP from GitHub and replace your local files).
+   (Or download the new ZIP from GitHub and replace your local files).
 
-### STEP 2: UPDATE YOUR .ENV FILE
-Open your `.env` file and verify these keys. Do **NOT** remove `REWARD_ROLE_ID`.
+### STEP 2: UPDATE YOUR .ENV & RENDER
+Open your `.env` file and **UPDATE** the names of these keys:
+- Change `CLIENT_ID` to `DISCORD_CLIENT_ID`
+- Change `GUILD_ID` to `DISCORD_GUILD_ID`
 
+**You MUST also go to your Render.com Dashboard -> Environment and rename/add these variables there so the bot can see them.**
+
+**Your .env / Render variables should look like this:**
 ```text
 # Discord & Base Config
 DISCORD_TOKEN=
-CLIENT_ID=
-GUILD_ID=
+DISCORD_CLIENT_ID=
+DISCORD_GUILD_ID=
 REWARD_ROLE_ID=
 
 # Database & Offerwall (REQUIRED)
@@ -31,13 +36,12 @@ GOOGLE_CLIENT_SECRET=
 JWT_SECRET=
 PORT=3000
 ```
-*(Note: `BASE_URL`, `DISCORD_CLIENT_ID`, and `DISCORD_GUILD_ID` are no longer required; just use the ones listed above).*
 
 ### STEP 3: COMMIT & DEPLOY
 1. Open your terminal in the project folder.
 2. Run these commands:
    `git add .`
-   `git commit -m "Update: responsiveness and history management"`
+   `git commit -m "Update: unify Discord env variable names"`
    `git push`
-3. Go to **Render.com** -> Your Web Service -> Environment -> Update your variables to match the new list above.
-4. Render will automatically redeploy the new code.
+3. Render will automatically redeploy. 
+4. **IMPORTANT**: If the bot doesn't start, double-check that you renamed the variables on the Render Dashboard Environment tab.
