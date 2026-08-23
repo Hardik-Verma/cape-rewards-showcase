@@ -477,10 +477,11 @@ router.all('/postback', async (req, res) => {
     const rewardAmount = parseInt(reward) || 150;
     
     try {
-        const user = await User.findByIdAndUpdate(userId, { $inc: { balance: rewardAmount } });
+        const user = await User.findByIdAndUpdate(userId, { $inc: { balance: rewardAmount } }, { returnDocument: 'after' });
         if (!user) return res.status(404).json({ error: 'User not found' });
         res.status(200).json({ success: true, message: `Granted ${rewardAmount} points` });
     } catch (e) {
+        console.error('DATABASE ERROR (Postback):', e);
         res.status(500).json({ error: 'Error updating balance' });
     }
 });
@@ -494,10 +495,11 @@ router.all('/test-postback', async (req, res) => {
     const rewardAmount = parseInt(reward) || 150;
     
     try {
-        const user = await User.findByIdAndUpdate(userId, { $inc: { balance: rewardAmount } });
+        const user = await User.findByIdAndUpdate(userId, { $inc: { balance: rewardAmount } }, { returnDocument: 'after' });
         if (!user) return res.status(404).json({ error: 'User not found' });
         res.status(200).json({ success: true, message: `Test granted ${rewardAmount} points` });
     } catch (e) {
+        console.error('DATABASE ERROR (Test-Postback):', e);
         res.status(500).json({ error: 'Error' });
     }
 });
