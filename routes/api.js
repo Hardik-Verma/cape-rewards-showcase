@@ -1,19 +1,194 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User, Item, VerificationCode, Order } = require('../database/db');
+const { User, Item, VerificationCode, Order, Postback, SiteConfig } = require('../database/db');
 const { OAuth2Client } = require('google-auth-library');
 const JWT_SECRET = process.env.JWT_SECRET || 'capeverse-super-secret-key';
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Secure config for frontend
-router.get('/config', (req, res) => {
+router.get('/config', async (req, res) => {
+    let discordInviteLink = process.env.DISCORD_INVITE_LINK || 'https://discord.gg/tgCFxYD948';
+    try {
+        const config = await SiteConfig.findOne();
+        if (config && config.discordInviteLink) discordInviteLink = config.discordInviteLink;
+    } catch (e) {
+        console.error('Error loading site config:', e);
+    }
     res.json({
-        cpaUrl: process.env.BITCOTASKS_URL || '',
-        googleClientId: process.env.GOOGLE_CLIENT_ID || ''
+        googleClientId: process.env.GOOGLE_CLIENT_ID || '',
+        discordInviteLink
     });
+});
+
+// Server-side only helper: build the canonical Bitcotasks offerwall URL.
+// The API key is held here and NEVER returned to the browser.
+function buildOfferwallUrl(base, userId) {
+    const raw = (base || '').trim();
+    if (!raw) return { valid: false, reason: 'empty' };
+    const hasPlaceholder = /(\[[^\]]*\]|YOUR_|API_?KEY|OFFERWALL_ID|\{uid\}|\{user_id\}|example|demo)/i.test(raw);
+    const m = raw.match(/^(https?:\/\/[^/]+)\/offerwall\/([^/\s?#]+)/i);
+    const origin = m ? m[1] : '';
+    const key = m ? m[2] : '';
+    if (hasPlaceholder || !m || !/^[A-Za-z0-9_\-]{8,64}$/.test(key)) {
+        return { valid: false, reason: 'badkey' };
+    }
+    return { valid: true, url: `${origin}/offerwall/${key}/${userId}` };
+}
+
+// Safe status check (no secret data) so the page can show a config warning
+router.get('/offerwall/status', authenticateToken, (req, res) => {
+    const built = buildOfferwallUrl(process.env.BITCOTASKS_URL);
+    res.json({ valid: built.valid, reason: built.valid ? null : built.reason });
+});
+
+// Short-lived, offerwall-scoped ticket — keeps the user's session JWT out of the iframe URL
+router.get('/offerwall/ticket', authenticateToken, (req, res) => {
+    const ticket = jwt.sign({ id: req.user.id, scope: 'offerwall' }, JWT_SECRET, { expiresIn: '2m' });
+    res.json({ ticket });
+});
+
+// Offerwall gateway: keeps the API key on the server and 302s the iframe to
+// Bitcotasks, so the key never appears in our HTML, JS, DOM or API config.
+router.get('/offerwall/go', (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.set('Referrer-Policy', 'no-referrer');
+    res.set('X-Robots-Tag', 'noindex, nofollow');
+
+    const raw = req.query.ticket || req.query.token || (req.headers.authorization || '').replace(/^Bearer\s+/i, '') || '';
+    if (!raw) return res.status(401).send('Not authorized');
+
+    let userId;
+    try {
+        const payload = jwt.verify(raw, JWT_SECRET);
+        if (payload.scope && payload.scope !== 'offerwall') return res.status(403).send('Invalid ticket scope');
+        userId = payload.id;
+    } catch (e) {
+        return res.status(401).send('Not authorized');
+    }
+
+    const built = buildOfferwallUrl(process.env.BITCOTASKS_URL, userId);
+    if (!built.valid) return res.status(500).send('Offerwall is not configured correctly.');
+    res.redirect(302, built.url);
+});
+
+// GET site config (public-safe fields; only what's needed by logged-in admins)
+router.get('/config/site', authenticateToken, async (req, res) => {
+    try {
+        const config = await SiteConfig.findOne();
+        res.json({ success: true, discordInviteLink: (config && config.discordInviteLink) || process.env.DISCORD_INVITE_LINK || '' });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// POST site config (admin only) - lets admin update the invite link without editing code
+router.post('/config/site', authenticateAdmin, async (req, res) => {
+    const { discordInviteLink } = req.body;
+    if (!discordInviteLink || !/^https?:\/\//.test(discordInviteLink)) {
+        return res.status(400).json({ error: 'A valid invite link (http/https) is required' });
+    }
+    try {
+        await SiteConfig.findOneAndUpdate(
+            {},
+            { discordInviteLink, updatedAt: Date.now() },
+            { upsert: true, new: true }
+        );
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// POST postback secret (admin only) - stores the Bitcotasks Secret Key used for MD5 signature verification
+router.post('/config/postback', authenticateAdmin, async (req, res) => {
+    const { postbackSecret } = req.body;
+    if (!postbackSecret || postbackSecret.length < 6) {
+        return res.status(400).json({ error: 'A secret key of at least 6 characters is required' });
+    }
+    try {
+        await SiteConfig.findOneAndUpdate(
+            {},
+            { postbackSecret, updatedAt: Date.now() },
+            { upsert: true, new: true }
+        );
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// Public legal pages - only ToS/Privacy body text, never any secrets
+router.get('/legal', async (req, res) => {
+    try {
+        const config = await SiteConfig.findOne();
+        res.json({ tos: (config && config.tosContent) || '', privacy: (config && config.privacyContent) || '' });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// Admin: read current legal drafts
+router.get('/config/legal', authenticateAdmin, async (req, res) => {
+    try {
+        const config = await SiteConfig.findOne();
+        res.json({ success: true, tos: (config && config.tosContent) || '', privacy: (config && config.privacyContent) || '' });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// Admin: save ToS / Privacy content (raw HTML, admin-trusted)
+router.post('/config/legal', authenticateAdmin, async (req, res) => {
+    const { tos, privacy } = req.body;
+    if (typeof tos !== 'string' || typeof privacy !== 'string') {
+        return res.status(400).json({ error: 'tos and privacy must be strings' });
+    }
+    if (tos.length > 50000 || privacy.length > 50000) {
+        return res.status(400).json({ error: 'Content too long (max 50,000 characters)' });
+    }
+    try {
+        await SiteConfig.findOneAndUpdate(
+            {},
+            { tosContent: tos, privacyContent: privacy, updatedAt: Date.now() },
+            { upsert: true, new: true }
+        );
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// PROXY / VPN DETECTION - uses free ip-api.com endpoint (no key required)
+router.get('/proxy-check', async (req, res) => {
+    try {
+        const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.ip || '';
+        if (!ip || ip === '::1' || ip === '127.0.0.1' || ip.startsWith('::ffff:127')) {
+            return res.json({ success: true, ip, proxy: false, hosting: false });
+        }
+
+        const apiRes = await fetch(`http://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,proxy,hosting,country,query`, { signal: AbortSignal.timeout(5000) });
+        const data = await apiRes.json();
+
+        if (data.status === 'fail') {
+            return res.json({ success: true, ip, proxy: false, hosting: false });
+        }
+
+        res.json({
+            success: true,
+            ip: data.query || ip,
+            country: data.country || 'Unknown',
+            proxy: !!data.proxy,
+            hosting: !!data.hosting,
+            blocked: !!(data.proxy || data.hosting)
+        });
+    } catch (e) {
+        console.error('Proxy check error:', e);
+        res.json({ success: true, ip: '', proxy: false, hosting: false, blocked: false });
+    }
 });
 
 // Brevo API keep-alive to prevent 90-day expiration
@@ -301,6 +476,61 @@ router.get('/me', authenticateToken, async (req, res) => {
     }
 });
 
+// --- PROFILE SECURITY (EMAIL / PASSWORD) ---
+
+// Change password (requires the current password; no 2FA needed)
+router.post('/profile/password', authenticateToken, async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) return res.status(400).json({ error: 'All fields required' });
+    if (newPassword.length < 8) return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    if (currentPassword === newPassword) return res.status(400).json({ error: 'New password must be different from the current one' });
+
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (!user.password_hash) return res.status(400).json({ error: 'This account uses Google Sign-In' });
+
+        const valid = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!valid) return res.status(401).json({ error: 'Current password is incorrect' });
+
+        user.password_hash = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        res.json({ success: true, message: 'Password updated' });
+    } catch (e) {
+        console.error('Profile password error:', e);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// Change email (requires the current password; email must be unique)
+router.post('/profile/email', authenticateToken, async (req, res) => {
+    const { password, email } = req.body;
+    if (!password || !email) return res.status(400).json({ error: 'All fields required' });
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(email)) return res.status(400).json({ error: 'Invalid email address' });
+
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (!user.password_hash) return res.status(400).json({ error: 'This account uses Google Sign-In' });
+
+        const valid = await bcrypt.compare(password, user.password_hash);
+        if (!valid) return res.status(401).json({ error: 'Password is incorrect' });
+
+        const existing = await User.findOne({ email, _id: { $ne: user._id } });
+        if (existing) return res.status(400).json({ error: 'That email is already in use' });
+
+        user.email = email;
+        await user.save();
+
+        res.json({ success: true, message: 'Email updated' });
+    } catch (e) {
+        console.error('Profile email error:', e);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
 // --- ITEMS (PUBLIC & ADMIN) ---
 
 router.get('/items', async (req, res) => {
@@ -313,9 +543,9 @@ router.get('/items', async (req, res) => {
 });
 
 router.post('/admin/items', authenticateAdmin, async (req, res) => {
-    const { id, name, type, cost, image, stock } = req.body;
+    const { id, name, type, cost, image, stock, autoDeliver } = req.body;
     try {
-        await Item.findOneAndUpdate({ id }, { name, type, cost, image, stock }, { upsert: true });
+        await Item.findOneAndUpdate({ id }, { name, type, cost, image, stock, autoDeliver: !!autoDeliver }, { upsert: true });
         res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: 'Database error' });
@@ -371,14 +601,15 @@ router.post('/cashout', authenticateToken, async (req, res) => {
         
         const item = await Item.findOne({ id: rewardId });
         if (!item) return res.status(400).json({ error: 'Invalid item' });
-        
-        if (item.stock === 0) return res.status(400).json({ error: 'Out of stock' });
+
+        const isUnlimited = item.stock === -1;
+        if (!isUnlimited && item.stock <= 0) return res.status(400).json({ error: 'Out of stock' });
         if (user.balance < item.cost) return res.status(400).json({ error: 'Not enough points' });
 
-        user.balance = 0;
+        user.balance -= item.cost;
         await user.save();
 
-        if (item.stock > 0) {
+        if (!isUnlimited && item.stock > 0) {
             item.stock -= 1;
             await item.save();
         }
@@ -386,8 +617,22 @@ router.post('/cashout', authenticateToken, async (req, res) => {
         const token = uuidv4();
         const timestamp = Date.now();
 
-        await Order.create({ user_id: user._id, name: item.name, token, points: item.cost, timestamp });
-        res.json({ success: true, token });
+        const isAutoDeliver = !!item.autoDeliver;
+        const order = await Order.create({ 
+            user_id: user._id, 
+            name: item.name, 
+            token, 
+            points: item.cost, 
+            timestamp,
+            redeemed: isAutoDeliver
+        });
+
+        const orderRef = String(order._id).slice(-8).toUpperCase();
+        if (isAutoDeliver) {
+            res.json({ success: true, orderRef, autoDelivered: true, message: 'Entry submitted automatically — no ticket needed!' });
+        } else {
+            res.json({ success: true, orderRef });
+        }
     } catch (e) {
         res.status(500).json({ error: 'Database error' });
     }
@@ -396,7 +641,7 @@ router.post('/cashout', authenticateToken, async (req, res) => {
 router.get('/history', authenticateToken, async (req, res) => {
     try {
         const rows = await Order.find({ user_id: req.user.id }).sort({ timestamp: -1 });
-        const history = rows.map(r => ({ id: r._id, name: r.name, token: r.token, points: r.points, timestamp: r.timestamp, date: new Date(r.timestamp).toLocaleDateString() }));
+        const history = rows.map(r => ({ id: r._id, name: r.name, token: r.token, points: r.points, timestamp: r.timestamp, redeemed: !!r.redeemed, date: new Date(r.timestamp).toLocaleDateString() }));
         res.json({ success: true, history });
     } catch (e) {
         res.status(500).json({ error: 'Database error' });
@@ -433,11 +678,45 @@ router.get('/admin/users', authenticateAdmin, async (req, res) => {
     }
 });
 
-router.post('/admin/users/:id/points', authenticateAdmin, async (req, res) => {
-    const { amount } = req.body;
+// --- ADMIN ORDERS ENDPOINTS ---
+
+router.get('/admin/orders', authenticateAdmin, async (req, res) => {
     try {
-        await User.findByIdAndUpdate(req.params.id, { $inc: { balance: amount } });
+        const rows = await Order.find({}).sort({ timestamp: -1 }).limit(200);
+        const userIds = [...new Set(rows.map(r => r.user_id))];
+        const users = await User.find({ _id: { $in: userIds } }).select('_id username');
+        const userMap = {};
+        users.forEach(u => { userMap[String(u._id)] = u.username; });
+        const orders = rows.map(r => ({
+            id: r._id,
+            username: userMap[String(r.user_id)] || 'Unknown',
+            name: r.name,
+            points: r.points,
+            redeemed: !!r.redeemed,
+            date: new Date(r.timestamp).toLocaleDateString()
+        }));
+        res.json({ success: true, orders });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+router.post('/admin/orders/:id/deliver', authenticateAdmin, async (req, res) => {
+    try {
+        await Order.findByIdAndUpdate(req.params.id, { redeemed: true, redeemed_by: req.user.username || req.user.email || 'admin' });
         res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+router.post('/admin/users/:id/points', authenticateAdmin, async (req, res) => {
+    const amount = parseInt(req.body.amount, 10);
+    if (isNaN(amount)) return res.status(400).json({ error: 'Invalid amount' });
+    try {
+        const user = await User.findByIdAndUpdate(req.params.id, { $inc: { balance: amount } }, { new: true });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.json({ success: true, newBalance: user.balance });
     } catch (e) {
         res.status(500).json({ error: 'Database error' });
     }
@@ -464,43 +743,127 @@ router.post('/admin/users/:id/role', authenticateAdmin, async (req, res) => {
     }
 });
 
-// --- SURVEY ENDPOINTS ---
+// --- BITCOTASKS S2S POSTBACK ---
+// Spec: GET/POST to postback URL with params:
+//   subId, transId, reward, status (1=credit, 2=chargeback), signature
+// Signature = md5(subId + transId + reward + SECRET_KEY)
+// MUST respond with exactly "ok" (lowercase) or Bitcotasks recovers/retries.
 router.all('/postback', async (req, res) => {
+    console.log('=== POSTBACK RECEIVED ===', { method: req.method, query: req.query, body: req.body, headers: req.headers });
     const params = { ...req.query, ...req.body };
-    const userId = params.user_id || params.uid || params.subId || params.sub_id || params.subid || params.user;
-    const secret = params.secret || params.key;
-    const reward = params.reward || params.payout || params.points || params.amount;
+    const subId = params.subId || params.sub_id;
+    const transId = params.transId || params.transaction_id || params.trans_id;
+    const reward = params.reward || params.payout || params.amount;
+    const status = parseInt(params.status) || 1;
+    const signature = params.signature || '';
 
-    const expectedSecret = process.env.POSTBACK_SECRET;
-    if (expectedSecret && secret !== expectedSecret) return res.status(401).json({ error: 'Unauthorized' });
-    if (!userId) return res.status(400).json({ error: 'Missing user_id parameter' });
-    const rewardAmount = parseInt(reward) || 150;
-    
+    console.log('POSTBACK PARSED:', { subId, transId, reward, status, hasSignature: !!signature });
+
+    let secretKey = process.env.BITCOTASKS_SECRET || process.env.POSTBACK_SECRET;
     try {
-        const user = await User.findByIdAndUpdate(userId, { $inc: { balance: rewardAmount } }, { returnDocument: 'after' });
-        if (!user) return res.status(404).json({ error: 'User not found' });
-        res.status(200).json({ success: true, message: `Granted ${rewardAmount} points` });
+        const config = await SiteConfig.findOne();
+        if (config && config.postbackSecret) secretKey = config.postbackSecret;
     } catch (e) {
+        console.error('Error loading postback secret from config:', e);
+    }
+
+    console.log('POSTBACK SECRET CHECK:', { hasEnvSecret: !!(process.env.BITCOTASKS_SECRET || process.env.POSTBACK_SECRET), hasConfigSecret: !!secretKey, secretLength: secretKey?.length });
+
+    if (!subId) return res.status(400).send('invalid: missing subId');
+    if (!transId) return res.status(400).send('invalid: missing transId');
+    if (!secretKey) return res.status(500).send('invalid: server secret not configured');
+
+    // 1) Verify MD5 signature: md5(subId + transId + reward + secretKey)
+    const expectedSig = crypto.createHash('md5').update(`${subId}${transId}${reward}${secretKey}`).digest('hex');
+    console.log('POSTBACK SIG CHECK:', { expectedSig, receivedSig: signature, match: signature.toLowerCase() === expectedSig.toLowerCase() });
+    if (!signature || signature.toLowerCase() !== expectedSig.toLowerCase()) {
+        console.error(`SIGNATURE MISMATCH: subId=${subId}, transId=${transId}, reward=${reward}, expected=${expectedSig}, received=${signature}`);
+        return res.status(401).send('invalid signature');
+    }
+
+    const rewardAmount = parseFloat(reward) || 0;
+
+    // 2) Idempotency lock: record the transaction FIRST so a retried postback
+    //    (e.g. after a network timeout) can never double-credit the user.
+    try {
+        await Postback.create({
+            transId,
+            subId,
+            reward: rewardAmount,
+            offerName: params.offer_name || '',
+            status
+        });
+    } catch (err) {
+        if (err && err.code === 11000) return res.send('ok'); // Already processed
+        console.error('POSTBACK: could not record transaction:', err);
+        return res.status(500).send('internal error');
+    }
+
+    try {
+        const user = await User.findById(subId);
+        if (!user) {
+            console.error(`POSTBACK: user not found for subId=${subId}`);
+            await Postback.deleteOne({ transId }); // release lock so a retry still credits
+            return res.status(404).send('invalid: user not found');
+        }
+
+        // 3) Handle credit vs chargeback
+        if (status === 2) {
+            user.balance = Math.max(0, user.balance - rewardAmount);
+        } else {
+            user.balance += rewardAmount;
+        }
+        await user.save();
+
+        console.log(`POSTBACK OK: ${status === 2 ? 'CHARGEBACK' : 'CREDIT'} ${rewardAmount} pts to ${subId} (trans ${transId})`);
+        res.status(200).send('ok');
+    } catch (e) {
+        // If the credit write failed, release the lock so a retry can re-credit.
+        await Postback.deleteOne({ transId }).catch(() => {});
         console.error('DATABASE ERROR (Postback):', e);
-        res.status(500).json({ error: 'Error updating balance' });
+        res.status(500).send('internal error');
     }
 });
 
-router.all('/test-postback', async (req, res) => {
+// Test postback helper (admin-only; used for manual testing). Previously public —
+// it credited users without signature checks. Only signed BitcoTasks postbacks hit /postback.
+router.all('/test-postback', authenticateAdmin, async (req, res) => {
     const params = { ...req.query, ...req.body };
-    const userId = params.user_id || params.uid || params.subId || params.sub_id || params.subid || params.user;
-    const reward = params.reward || params.payout || params.points || params.amount;
+    const subId = params.subId || params.user_id || params.uid || params.user;
+    const transId = params.transId || Date.now().toString();
+    const reward = params.reward || params.payout || 150;
+    const status = parseInt(params.status) || 1;
 
-    if (!userId) return res.status(400).json({ error: 'Missing user_id' });
-    const rewardAmount = parseInt(reward) || 150;
-    
+    if (!subId) return res.status(400).send('Missing subId');
+
     try {
-        const user = await User.findByIdAndUpdate(userId, { $inc: { balance: rewardAmount } }, { returnDocument: 'after' });
-        if (!user) return res.status(404).json({ error: 'User not found' });
-        res.status(200).json({ success: true, message: `Test granted ${rewardAmount} points` });
+        await Postback.create({ transId, subId, reward: 0, offerName: 'test-lock', status });
+    } catch (err) {
+        if (err && err.code === 11000) return res.status(200).send('ok');
+        return res.status(500).send('Error');
+    }
+
+    try {
+        const user = await User.findById(subId);
+        if (!user) {
+            await Postback.deleteOne({ transId }).catch(() => {});
+            return res.status(404).send('User not found');
+        }
+
+        const rewardAmount = parseFloat(reward) || 150;
+        if (status === 2) {
+            user.balance = Math.max(0, user.balance - rewardAmount);
+        } else {
+            user.balance += rewardAmount;
+        }
+        await user.save();
+
+        await Postback.updateOne({ transId }, { reward: rewardAmount });
+        res.status(200).send('ok');
     } catch (e) {
+        await Postback.deleteOne({ transId }).catch(() => {});
         console.error('DATABASE ERROR (Test-Postback):', e);
-        res.status(500).json({ error: 'Error' });
+        res.status(500).send('Error');
     }
 });
 

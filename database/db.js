@@ -25,7 +25,8 @@ const itemSchema = new mongoose.Schema({
     type: { type: String, required: true },
     cost: { type: Number, required: true },
     image: { type: String, required: true },
-    stock: { type: Number, default: -1 }
+    stock: { type: Number, default: -1 },
+    autoDeliver: { type: Boolean, default: false }
 });
 const Item = mongoose.model('Item', itemSchema);
 
@@ -41,9 +42,30 @@ const orderSchema = new mongoose.Schema({
     name: { type: String, required: true },
     token: { type: String, required: true },
     points: { type: Number, default: 0 },
+    redeemed: { type: Boolean, default: false },
+    redeemed_by: { type: String },
     timestamp: { type: Number, required: true }
 });
 const Order = mongoose.model('Order', orderSchema);
+
+const postbackSchema = new mongoose.Schema({
+    transId: { type: String, required: true, unique: true },
+    subId: { type: String, required: true },
+    reward: { type: Number, default: 0 },
+    offerName: { type: String, default: '' },
+    status: { type: Number, default: 1 },
+    processedAt: { type: Date, default: Date.now }
+});
+const Postback = mongoose.model('Postback', postbackSchema);
+
+const siteConfigSchema = new mongoose.Schema({
+    discordInviteLink: { type: String, default: 'https://discord.gg/tgCFxYD948' },
+    postbackSecret: { type: String, default: '' },
+    tosContent: { type: String, default: '' },
+    privacyContent: { type: String, default: '' },
+    updatedAt: { type: Date, default: Date.now }
+});
+const SiteConfig = mongoose.model('SiteConfig', siteConfigSchema);
 
 // Seed default admin if not exists
 const seedDatabase = async () => {
@@ -61,15 +83,20 @@ const seedDatabase = async () => {
             console.log("Default admin account seeded.");
         }
 
-        // Seed default items if items collection is empty
         const itemCount = await Item.countDocuments();
         if (itemCount === 0) {
             await Item.insertMany([
-                { id: 'giveaway', name: 'Capeverse Giveaway Entry', type: 'Digital Cosmetic', cost: 50, image: '/logo.png', stock: -1 },
+                { id: 'giveaway', name: 'Capeverse Giveaway Entry', type: 'Digital Cosmetic', cost: 50, image: '/logo.png', stock: -1, autoDeliver: true },
                 { id: 'moonlight', name: 'Moonlight Trail Cape', type: 'Digital Cosmetic', cost: 1000, image: '/moonlight.webp', stock: -1 },
                 { id: 'crafter', name: 'Crafter Cape', type: 'Digital Cosmetic', cost: 1500, image: '/crafter.webp', stock: -1 }
             ]);
             console.log("Default items seeded.");
+        }
+
+        const configExists = await SiteConfig.findOne();
+        if (!configExists) {
+            await SiteConfig.create({ discordInviteLink: 'https://discord.gg/tgCFxYD948' });
+            console.log("Default site config seeded.");
         }
     } catch (err) {
         console.error("Error seeding database:", err);
@@ -82,5 +109,7 @@ module.exports = {
     User,
     Item,
     VerificationCode,
-    Order
+    Order,
+    Postback,
+    SiteConfig
 };
