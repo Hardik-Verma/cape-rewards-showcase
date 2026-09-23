@@ -61,6 +61,8 @@ const Postback = mongoose.model('Postback', postbackSchema);
 const siteConfigSchema = new mongoose.Schema({
     discordInviteLink: { type: String, default: 'https://discord.gg/tgCFxYD948' },
     postbackSecret: { type: String, default: '' },
+    bitcotasksApiKey: { type: String, default: '' },
+    bitcotasksOfferwallUrl: { type: String, default: '' },
     tosContent: { type: String, default: '' },
     privacyContent: { type: String, default: '' },
     updatedAt: { type: Date, default: Date.now }

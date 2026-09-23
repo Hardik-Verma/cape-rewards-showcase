@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | CAPEVERSE</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { obsidian: '#000000' }, fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap');
+        body { background-color: #030303; color: #ffffff; overflow-x: hidden; font-family: 'Inter', sans-serif; }
+        .glass-panel { background: #0a0a0a; border: 1px solid rgba(255, 255, 255, 0.05); }
+    </style>
+</head>
+<body class="flex min-h-screen bg-[#030303]">
+
+    <!-- Sidebar -->
+    <aside class="w-64 border-r border-white/5 bg-[#050505] hidden md:flex flex-col">
+        <div class="h-20 flex items-center justify-center border-b border-white/5">
+            <a href="/index.html" class="flex items-center gap-3">
+                <img src="/logo.png" alt="Logo" class="h-8">
+                <span class="text-white font-black text-sm tracking-widest sm:tracking-[0.2em] uppercase pt-0.5">ADMIN</span>
+            </a>
+        </div>
+        <nav class="flex-grow p-4 space-y-2">
+            <button onclick="switchTab('users')" id="tab-btn-users" class="w-full text-left px-4 py-3 bg-white/10 text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Users</button>
+            <button onclick="switchTab('items')" id="tab-btn-items" class="w-full text-left px-4 py-3 text-gray-500 hover:bg-white/5 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Items</button>
+            <button onclick="switchTab('orders')" id="tab-btn-orders" class="w-full text-left px-4 py-3 text-gray-500 hover:bg-white/5 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Orders</button>
+            <button onclick="switchTab('settings')" id="tab-btn-settings" class="w-full text-left px-4 py-3 text-gray-500 hover:bg-white/5 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Settings</button>
+            <button onclick="switchTab('legal')" id="tab-btn-legal" class="w-full text-left px-4 py-3 text-gray-500 hover:bg-white/5 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Legal Pages</button>
+        </nav>
+        <div class="p-4 border-t border-white/5">
+            <button onclick="logout()" class="w-full text-center px-4 py-3 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Logout</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col h-screen overflow-hidden">
+        <!-- Topbar -->
+        <header class="h-20 border-b border-white/5 bg-[#050505] flex items-center justify-between px-8 shrink-0">
+            <h1 id="page-title" class="text-xl font-black uppercase tracking-widest">Users Management</h1>
+            <div class="text-xs text-gray-500 font-bold uppercase tracking-widest">
+                Admin Panel
+            </div>
+        </header>
+
+        <!-- Scrollable Content -->
+        <div class="flex-grow p-8 overflow-y-auto">
+            
+            <!-- Users Tab -->
+            <div id="tab-users" class="space-y-6">
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-sm text-gray-400">
+                        <thead class="text-xs uppercase bg-black/50 border-b border-white/10 tracking-widest">
+                            <tr>
+                                <th class="px-6 py-4 font-bold">ID / User</th>
+                                <th class="px-6 py-4 font-bold">Role / Status</th>
+                                <th class="px-6 py-4 font-bold">Balance</th>
+                                <th class="px-6 py-4 font-bold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body" class="divide-y divide-white/5">
+                            <!-- JS populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Items Tab -->
+            <div id="tab-items" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold uppercase tracking-widest">Store Items</h2>
+                    <button onclick="openItemModal()" class="bg-white text-black hover:bg-gray-200 px-6 py-3 rounded-lg text-xs font-black uppercase tracking-widest transition-colors">Add Item</button>
+                </div>
+
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-sm text-gray-400">
+                        <thead class="text-xs uppercase bg-black/50 border-b border-white/10 tracking-widest">
+                            <tr>
+                                <th class="px-6 py-4 font-bold">Image / ID</th>
+                                <th class="px-6 py-4 font-bold">Name & Type</th>
+                                <th class="px-6 py-4 font-bold">Cost & Stock</th>
+                                <th class="px-6 py-4 font-bold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="items-table-body" class="divide-y divide-white/5">
+                            <!-- JS populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div id="tab-orders" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold uppercase tracking-widest">Redemption Requests</h2>
+                    <span id="orders-count" class="text-[10px] text-gray-600 uppercase font-bold tracking-widest"></span>
+                </div>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-sm text-gray-400">
+                        <thead class="text-xs uppercase bg-black/50 border-b border-white/10 tracking-widest">
+                            <tr>
+                                <th class="px-6 py-4 font-bold">User</th>
+                                <th class="px-6 py-4 font-bold">Item</th>
+                                <th class="px-6 py-4 font-bold">Points</th>
+                                <th class="px-6 py-4 font-bold">Date</th>
+                                <th class="px-6 py-4 font-bold">Status</th>
+                                <th class="px-6 py-4 font-bold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body" class="divide-y divide-white/5">
+                            <!-- JS populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="tab-settings" class="hidden space-y-6 max-w-2xl">
+                <div>
+                    <h2 class="text-lg font-bold uppercase tracking-widest">Site Settings</h2>
+                    <p class="text-gray-500 text-xs mt-1">Postback connection info and your account security.</p>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-widest mb-3">Bitcotasks Postback URL</h3>
+                    <p class="text-[11px] text-gray-600 mb-3">Paste this URL into the <b>Bitcotasks Dashboard → Postback URL</b> field. Bitcotasks appends all parameters automatically.</p>
+                    <div class="flex items-center gap-2">
+                        <code id="setting-postback-url" class="flex-grow text-[11px] text-emerald-400 bg-black/50 border border-white/10 rounded-lg p-3 break-all">https://YOUR-DOMAIN.com/api/postback</code>
+                        <button onclick="copyPostbackURL()" class="bg-white text-black hover:bg-gray-200 px-4 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors whitespace-nowrap">Copy</button>
+                    </div>
+                    <p class="text-[11px] text-gray-600 mt-2">Signature: <b>md5(subId + transId + reward + SecretKey)</b> — must respond with exactly <code class="text-emerald-400">ok</code>. Whitelist Bitcotasks IP <code class="text-gray-300">45.14.135.48</code> if your host requires it.</p>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-widest mb-1">Account Security</h3>
+                    <p class="text-[11px] text-gray-600 mb-5">Logged in as <span id="admin-email" class="text-white font-bold">...</span> &nbsp;•&nbsp; role: <span class="text-purple-400 font-bold uppercase">Admin</span></p>
+
+                    <div class="space-y-5">
+                        <div class="border border-white/10 rounded-xl p-4">
+                            <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-2">Change Email</label>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="password" id="security-current-password" autocomplete="current-password" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3" placeholder="Current password">
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-2 mt-2">
+                                <input type="email" id="security-new-email" autocomplete="email" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3" placeholder="New email address">
+                                <button onclick="saveEmail()" class="bg-white text-black hover:bg-gray-200 px-6 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors whitespace-nowrap">Update Email</button>
+                            </div>
+                            <p class="text-[10px] text-gray-600 mt-1">Enter your current password plus the new email.</p>
+                        </div>
+
+                        <div class="border border-white/10 rounded-xl p-4">
+                            <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-2">Change Password</label>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="password" id="security-current-pass-pw" autocomplete="current-password" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3" placeholder="Current password">
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-2 mt-2">
+                                <input type="password" id="security-new-password" autocomplete="new-password" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3" placeholder="New password (min 8 characters)">
+                                <button onclick="savePassword()" class="bg-white text-black hover:bg-gray-200 px-6 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors whitespace-nowrap">Update Password</button>
+                            </div>
+                            <p class="text-[10px] text-gray-600 mt-1">New password must be at least 8 characters.</p>
+                        </div>
+                    </div>
+
+                    <div id="security-status" class="hidden mt-4 text-xs font-bold uppercase tracking-widest"></div>
+                </div>
+            </div>
+
+            <!-- Legal Pages Tab -->
+            <div id="tab-legal" class="hidden space-y-6 max-w-3xl">
+                <div>
+                    <h2 class="text-lg font-bold uppercase tracking-widest">Legal Pages</h2>
+                    <p class="text-gray-500 text-xs mt-1">Edit the Terms of Service and Privacy Policy. They update instantly on <b class="text-gray-300">/tos.html</b> and <b class="text-gray-300">/privacy.html</b>.</p>
+                </div>
+                <div class="glass-panel rounded-2xl p-6 space-y-5">
+                    <div>
+                        <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-2">Terms of Service</label>
+                        <textarea id="legal-tos" rows="14" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3 font-mono" placeholder="Enter Terms of Service content..."></textarea>
+                        <p class="text-[11px] text-gray-600 mt-1">Basic HTML is allowed (&lt;h3&gt;, &lt;p&gt;, &lt;b&gt;). Leave empty to keep the built-in default text.</p>
+                    </div>
+                    <div class="border-t border-white/10 pt-4">
+                        <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-2">Privacy Policy</label>
+                        <textarea id="legal-privacy" rows="14" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3 font-mono" placeholder="Enter Privacy Policy content..."></textarea>
+                        <p class="text-[11px] text-gray-600 mt-1">Basic HTML is allowed. Leave empty to keep the built-in default text.</p>
+                    </div>
+                    <div class="flex justify-end">
+                        <button onclick="saveLegal()" class="bg-white text-black hover:bg-gray-200 px-8 py-3 rounded-lg text-xs font-black uppercase tracking-widest transition-colors">Save Legal Pages</button>
+                    </div>
+                    <div id="legal-status" class="hidden text-xs font-bold uppercase tracking-widest"></div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modals -->
+
+    <!-- Edit User Modal -->
+    <div id="user-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-5 sm:p-8 relative">
+            <button onclick="closeModals()" class="absolute top-4 right-4 text-gray-500 hover:text-white">&times;</button>
+            <h3 class="text-lg font-black text-white mb-6 uppercase tracking-widest">Edit User</h3>
+            
+            <input type="hidden" id="edit-user-id">
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Add/Remove Points (Use negative to remove)</label>
+                    <input type="number" id="edit-user-points" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3" placeholder="0">
+                </div>
+                
+                <div class="flex items-center gap-4 pt-4 border-t border-white/10">
+                    <button onclick="saveUserPoints()" class="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-black border border-emerald-500/50 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Apply Points</button>
+                    <button id="ban-btn" onclick="toggleBan()" class="bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/50 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Ban User</button>
+                    <button id="admin-btn" onclick="toggleAdmin()" class="bg-purple-500/20 text-purple-400 hover:bg-purple-500 hover:text-white border border-purple-500/50 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Make Admin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div id="item-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-5 sm:p-8 relative">
+            <button onclick="closeModals()" class="absolute top-4 right-4 text-gray-500 hover:text-white">&times;</button>
+            <h3 class="text-lg font-black text-white mb-6 uppercase tracking-widest" id="item-modal-title">Add Item</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">ID (unique, e.g. crafter_cape)</label>
+                    <input type="text" id="item-id" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-2">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Name</label>
+                    <input type="text" id="item-name" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-2">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Type</label>
+                    <input type="text" id="item-type" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-2" value="Digital Cosmetic">
+                </div>
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Cost</label>
+                        <input type="number" id="item-cost" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-2">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Stock</label>
+                        <input type="number" id="item-stock" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-2" value="-1" title="-1 for unlimited">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Image URL (Hosted via ImgBB)</label>
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <input type="text" id="item-image" class="flex-grow bg-black/50 border border-white/10 text-white text-sm rounded-lg p-2" placeholder="https://i.ibb.co/...">
+                        <label class="cursor-pointer bg-blue-500/20 text-blue-400 hover:bg-blue-500 hover:text-white border border-blue-500/50 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors whitespace-nowrap">
+                            Upload
+                            <input type="file" id="item-image-upload" accept="image/*" class="hidden" onchange="uploadImage(this)">
+                        </label>
+                    </div>
+                    <div id="upload-status" class="text-[10px] text-gray-400 mt-1 hidden">Uploading...</div>
+                </div>
+                
+                <button onclick="saveItem()" class="w-full bg-white text-black hover:bg-gray-200 p-3 rounded-lg text-xs font-black uppercase tracking-widest transition-colors mt-4">Save Item</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const authToken = localStorage.getItem('auth_token');
+        if (!authToken) window.location.href = '/login.html';
+
+        let currentUsers = [];
+        let currentItems = [];
+        let editingUserId = null;
+        let editingUserObj = null;
+
+        async function init() {
+            try {
+                const res = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${authToken}` }});
+                const data = await res.json();
+                if (!data.success || data.user.role !== 'admin') {
+                    window.location.href = '/index.html';
+                }
+                
+                loadUsers();
+                loadItems();
+            } catch(e) {
+                window.location.href = '/login.html';
+            }
+        }
+
+        function switchTab(tab) {
+            document.getElementById('tab-users').classList.add('hidden');
+            document.getElementById('tab-items').classList.add('hidden');
+            document.getElementById('tab-orders').classList.add('hidden');
+            document.getElementById('tab-settings').classList.add('hidden');
+            document.getElementById('tab-legal').classList.add('hidden');
+            
+            document.getElementById('tab-btn-users').classList.remove('bg-white/10', 'text-white');
+            document.getElementById('tab-btn-users').classList.add('text-gray-500');
+            document.getElementById('tab-btn-items').classList.remove('bg-white/10', 'text-white');
+            document.getElementById('tab-btn-items').classList.add('text-gray-500');
+            document.getElementById('tab-btn-orders').classList.remove('bg-white/10', 'text-white');
+            document.getElementById('tab-btn-orders').classList.add('text-gray-500');
+            document.getElementById('tab-btn-settings').classList.remove('bg-white/10', 'text-white');
+            document.getElementById('tab-btn-settings').classList.add('text-gray-500');
+            document.getElementById('tab-btn-legal').classList.remove('bg-white/10', 'text-white');
+            document.getElementById('tab-btn-legal').classList.add('text-gray-500');
+
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tab}`).classList.add('bg-white/10', 'text-white');
+            document.getElementById(`tab-btn-${tab}`).classList.remove('text-gray-500');
+
+            const titles = { users: 'Users Management', items: 'Store Items', orders: 'Redemption Requests', settings: 'Site Settings', legal: 'Legal Pages' };
+            document.getElementById('page-title').innerText = titles[tab] || 'Admin Panel';
+
+            if (tab === 'settings') loadSettings();
+            if (tab === 'legal') loadLegal();
+            if (tab === 'orders') loadOrders();
+        }
+
+        async function fetchWithAuth(url, options = {}) {
+            options.headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            };
+            const res = await fetch(url, options);
+            if (res.status === 401 || res.status === 403) {
+                alert('Session expired or unauthorized');
+                window.location.href = '/login.html';
+            }
+            return res;
+        }
+
+        // --- USERS ---
+        async function loadUsers() {
+            const res = await fetchWithAuth('/api/admin/users');
+            const data = await res.json();
+            currentUsers = data.users;
+            renderUsers();
+        }
+
+        function renderUsers() {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = currentUsers.map(u => `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="text-white font-bold">${u.username}</div>
+                        <div class="text-[10px] uppercase tracking-widest">${u.email}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-block px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest ${u.role === 'admin' ? 'bg-purple-500/20 text-purple-400' : 'bg-gray-500/20 text-gray-400'}">${u.role}</span>
+                        ${u.banned ? `<span class="inline-block px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest bg-red-500/20 text-red-500 ml-2">Banned</span>` : ''}
+                    </td>
+                    <td class="px-6 py-4 font-bold text-emerald-400">${u.balance} PTS</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="openUserModal('${u.id}')" class="text-blue-400 hover:text-white uppercase text-[10px] font-bold tracking-widest border border-blue-400/50 hover:bg-blue-500/20 px-3 py-1 rounded transition-colors">Manage</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openUserModal(id) {
+            editingUserId = id;
+            editingUserObj = currentUsers.find(u => u.id === id);
+            
+            document.getElementById('edit-user-points').value = 0;
+            
+            const banBtn = document.getElementById('ban-btn');
+            banBtn.innerText = editingUserObj.banned ? 'Unban User' : 'Ban User';
+            
+            const adminBtn = document.getElementById('admin-btn');
+            adminBtn.innerText = editingUserObj.role === 'admin' ? 'Demote Admin' : 'Make Admin';
+            
+            document.getElementById('user-modal').classList.remove('hidden');
+            document.getElementById('user-modal').classList.add('flex');
+        }
+
+        async function saveUserPoints() {
+            const pts = parseInt(document.getElementById('edit-user-points').value) || 0;
+            if (pts === 0) return closeModals();
+            
+            await fetchWithAuth(`/api/admin/users/${editingUserId}/points`, {
+                method: 'POST',
+                body: JSON.stringify({ amount: pts })
+            });
+            loadUsers();
+            closeModals();
+        }
+
+        async function toggleBan() {
+            const newBannedState = !editingUserObj.banned;
+            await fetchWithAuth(`/api/admin/users/${editingUserId}/ban`, {
+                method: 'POST',
+                body: JSON.stringify({ banned: newBannedState })
+            });
+            loadUsers();
+            closeModals();
+        }
+
+        async function toggleAdmin() {
+            const newRole = editingUserObj.role === 'admin' ? 'user' : 'admin';
+            await fetchWithAuth(`/api/admin/users/${editingUserId}/role`, {
+                method: 'POST',
+                body: JSON.stringify({ role: newRole })
+            });
+            loadUsers();
+            closeModals();
+        }
+
+        // --- ORDERS ---
+        async function loadOrders() {
+            const res = await fetchWithAuth('/api/admin/orders');
+            const data = await res.json();
+            renderOrders(data.orders || []);
+        }
+
+        function renderOrders(orders) {
+            const tbody = document.getElementById('orders-table-body');
+            document.getElementById('orders-count').innerText = orders.length + ' TOTAL';
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-gray-600 uppercase tracking-widest font-bold text-xs">No redemption requests yet</td></tr>';
+                return;
+            }
+            tbody.innerHTML = orders.map(o => `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-6 py-4"><div class="text-white font-bold">${o.username}</div></td>
+                    <td class="px-6 py-4 text-white">${o.name}</td>
+                    <td class="px-6 py-4 font-bold text-emerald-400">${o.points} PTS</td>
+                    <td class="px-6 py-4 text-gray-500">${o.date}</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-block px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest ${o.redeemed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-yellow-500/20 text-yellow-500'}">${o.redeemed ? 'Delivered' : 'Pending'}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        ${o.redeemed ? '' : `<button onclick="markDelivered('${o.id}')" class="text-emerald-400 hover:text-white uppercase text-[10px] font-bold tracking-widest border border-emerald-400/50 hover:bg-emerald-500/20 px-3 py-1 rounded transition-colors">Mark Delivered</button>`}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function markDelivered(id) {
+            if (!confirm('Mark this request as delivered? This happens manually after handing out the reward in the Discord ticket.')) return;
+            const res = await fetchWithAuth(`/api/admin/orders/${id}/deliver`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                loadOrders();
+            } else {
+                alert('Failed to update order.');
+            }
+        }
+
+        // --- ITEMS ---
+        async function loadItems() {
+            const res = await fetch('/api/items'); // public endpoint
+            const data = await res.json();
+            currentItems = data.items;
+            renderItems();
+        }
+
+        function renderItems() {
+            const tbody = document.getElementById('items-table-body');
+            tbody.innerHTML = currentItems.map(i => `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-6 py-4 flex items-center gap-4">
+                        <img src="${i.image}" class="w-8 h-8 object-contain">
+                        <span class="text-[10px] font-mono tracking-widest text-gray-500">${i.id}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-white font-bold">${i.name}</div>
+                        <div class="text-[10px] uppercase tracking-widest">${i.type}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-emerald-400">${i.cost} PTS</div>
+                        <div class="text-[10px] uppercase tracking-widest text-gray-500">Stock: ${i.stock === -1 ? 'Unlimited' : i.stock}</div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="editItem('${i.id}')" class="text-blue-400 hover:text-white uppercase text-[10px] font-bold tracking-widest border border-blue-400/50 hover:bg-blue-500/20 px-3 py-1 rounded transition-colors mr-2">Edit</button>
+                        <button onclick="deleteItem('${i.id}')" class="text-red-500 hover:text-white uppercase text-[10px] font-bold tracking-widest border border-red-500/50 hover:bg-red-500/20 px-3 py-1 rounded transition-colors">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openItemModal(item = null) {
+            if (item) {
+                document.getElementById('item-modal-title').innerText = 'Edit Item';
+                document.getElementById('item-id').value = item.id;
+                document.getElementById('item-id').readOnly = true;
+                document.getElementById('item-name').value = item.name;
+                document.getElementById('item-type').value = item.type;
+                document.getElementById('item-cost').value = item.cost;
+                document.getElementById('item-stock').value = item.stock;
+                document.getElementById('item-image').value = item.image;
+            } else {
+                document.getElementById('item-modal-title').innerText = 'Add Item';
+                document.getElementById('item-id').value = '';
+                document.getElementById('item-id').readOnly = false;
+                document.getElementById('item-name').value = '';
+                document.getElementById('item-type').value = 'Digital Cosmetic';
+                document.getElementById('item-cost').value = '';
+                document.getElementById('item-stock').value = '-1';
+                document.getElementById('item-image').value = '';
+            }
+            document.getElementById('item-modal').classList.remove('hidden');
+            document.getElementById('item-modal').classList.add('flex');
+        }
+
+        function editItem(id) {
+            const item = currentItems.find(i => i.id === id);
+            openItemModal(item);
+        }
+
+        async function deleteItem(id) {
+            if (!confirm('Are you sure you want to delete this item?')) return;
+            await fetchWithAuth(`/api/admin/items/${id}`, { method: 'DELETE' });
+            loadItems();
+        }
+
+        async function uploadImage(input) {
+            if (!input.files || input.files.length === 0) return;
+            const file = input.files[0];
+            const reader = new FileReader();
+            
+            const statusEl = document.getElementById('upload-status');
+            statusEl.innerText = "Uploading to ImgBB...";
+            statusEl.classList.remove('hidden');
+            statusEl.classList.remove('text-red-500', 'text-emerald-500');
+            statusEl.classList.add('text-gray-400');
+
+            reader.onload = async (e) => {
+                const base64Str = e.target.result.split(',')[1];
+                try {
+                    const res = await fetchWithAuth('/api/admin/upload', {
+                        method: 'POST',
+                        body: JSON.stringify({ imageBase64: base64Str })
+                    });
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        document.getElementById('item-image').value = data.url;
+                        statusEl.innerText = "Upload complete!";
+                        statusEl.classList.remove('text-gray-400');
+                        statusEl.classList.add('text-emerald-500');
+                    } else {
+                        statusEl.innerText = data.error || "Upload failed.";
+                        statusEl.classList.remove('text-gray-400');
+                        statusEl.classList.add('text-red-500');
+                    }
+                } catch(err) {
+                    statusEl.innerText = "Error connecting to server.";
+                    statusEl.classList.remove('text-gray-400');
+                    statusEl.classList.add('text-red-500');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function saveItem() {
+            const item = {
+                id: document.getElementById('item-id').value,
+                name: document.getElementById('item-name').value,
+                type: document.getElementById('item-type').value,
+                cost: parseInt(document.getElementById('item-cost').value),
+                stock: parseInt(document.getElementById('item-stock').value),
+                image: document.getElementById('item-image').value
+            };
+            if (!item.id || !item.name || isNaN(item.cost) || !item.image) return alert("Please fill all fields");
+
+            await fetchWithAuth('/api/admin/items', {
+                method: 'POST',
+                body: JSON.stringify(item)
+            });
+            loadItems();
+            closeModals();
+        }
+
+        // --- SETTINGS ---
+        async function loadSettings() {
+            // Show the correct postback URL for the live domain
+            const pbEl = document.getElementById('setting-postback-url');
+            if (pbEl) pbEl.innerText = `${window.location.origin}/api/postback`;
+
+            // Show the logged-in admin's email
+            try {
+                const res = await fetchWithAuth('/api/me');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('admin-email').innerText = data.user.email || '(no email set)';
+                }
+            } catch (e) {}
+        }
+
+        async function copyPostbackURL() {
+            const el = document.getElementById('setting-postback-url');
+            if (!el) return;
+            try {
+                await navigator.clipboard.writeText(el.innerText);
+                const btn = event && event.currentTarget;
+                if (btn) {
+                    const original = btn.innerText;
+                    btn.innerText = 'Copied!';
+                    setTimeout(() => { btn.innerText = original; }, 1500);
+                }
+            } catch (e) {
+                const t = document.createElement('textarea');
+                t.value = el.innerText;
+                t.style.position = 'fixed';
+                t.style.left = '-9999px';
+                document.body.appendChild(t);
+                t.select();
+                document.execCommand('copy');
+                t.remove();
+            }
+        }
+
+        function showSecurityStatus(message, isError) {
+            const el = document.getElementById('security-status');
+            el.innerText = message;
+            el.classList.remove('hidden', 'text-emerald-500', 'text-red-500');
+            el.classList.add(isError ? 'text-red-500' : 'text-emerald-500');
+            setTimeout(() => el.classList.add('hidden'), 4000);
+        }
+
+        async function saveEmail() {
+            const password = document.getElementById('security-current-password').value.trim();
+            const email = document.getElementById('security-new-email').value.trim();
+            if (!password || !email) return alert('Enter your current password and the new email.');
+
+            try {
+                const res = await fetchWithAuth('/api/profile/email', {
+                    method: 'POST',
+                    body: JSON.stringify({ password, email })
+                });
+                const data = await res.json();
+                if (!data.success) return showSecurityStatus(data.error || 'Failed to update email.', true);
+                document.getElementById('security-current-password').value = '';
+                document.getElementById('security-new-email').value = '';
+                document.getElementById('admin-email').innerText = email;
+                showSecurityStatus('Email updated!');
+            } catch (e) {
+                showSecurityStatus('Network error.', true);
+            }
+        }
+
+        async function savePassword() {
+            const currentPassword = document.getElementById('security-current-pass-pw').value.trim();
+            const newPassword = document.getElementById('security-new-password').value.trim();
+            if (!currentPassword || !newPassword) return alert('Enter your current and new passwords.');
+            if (newPassword.length < 8) return alert('New password must be at least 8 characters.');
+
+            try {
+                const res = await fetchWithAuth('/api/profile/password', {
+                    method: 'POST',
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+                const data = await res.json();
+                if (!data.success) return showSecurityStatus(data.error || 'Failed to update password.', true);
+                document.getElementById('security-current-pass-pw').value = '';
+                document.getElementById('security-new-password').value = '';
+                showSecurityStatus('Password updated!');
+            } catch (e) {
+                showSecurityStatus('Network error.', true);
+            }
+        }
+
+        // --- LEGAL PAGES ---
+        async function loadLegal() {
+            try {
+                const res = await fetchWithAuth('/api/config/legal');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('legal-tos').value = data.tos || '';
+                    document.getElementById('legal-privacy').value = data.privacy || '';
+                }
+            } catch (e) {}
+        }
+
+        async function saveLegal() {
+            const tos = document.getElementById('legal-tos').value;
+            const privacy = document.getElementById('legal-privacy').value;
+
+            try {
+                const res = await fetchWithAuth('/api/config/legal', {
+                    method: 'POST',
+                    body: JSON.stringify({ tos, privacy })
+                });
+                const data = await res.json();
+                const statusEl = document.getElementById('legal-status');
+                statusEl.classList.remove('hidden', 'text-red-500');
+                statusEl.classList.add('text-emerald-500');
+                statusEl.innerText = data.success ? 'Legal pages saved!' : (data.error || 'Failed to save.');
+                setTimeout(() => statusEl.classList.add('hidden'), 3000);
+            } catch (e) {
+                const st = document.getElementById('legal-status');
+                st.classList.remove('hidden');
+                st.classList.add('text-red-500');
+                st.innerText = 'Network error.';
+                setTimeout(() => st.classList.add('hidden'), 3000);
+            }
+        }
+
+        // --- GLOBAL ---
+        function closeModals() {
+            document.getElementById('user-modal').classList.add('hidden');
+            document.getElementById('user-modal').classList.remove('flex');
+            document.getElementById('item-modal').classList.add('hidden');
+            document.getElementById('item-modal').classList.remove('flex');
+        }
+
+        function logout() {
+            localStorage.removeItem('auth_token');
+            window.location.href = '/login.html';
+        }
+
+        init();
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const isAuth = !!localStorage.getItem('auth_token');
+            document.querySelectorAll('.auth-hidden').forEach(el => el.classList.toggle('hidden', isAuth));
+            document.querySelectorAll('.auth-visible').forEach(el => el.classList.toggle('hidden', !isAuth));
+        });
+        if (typeof logout === 'undefined') {
+            window.logout = function() {
+                localStorage.removeItem('auth_token');
+                window.location.href = '/login.html';
+            }
+        }
+    </script>
+
+    <script src="/auth.js"></script>
+</body>
+</html>

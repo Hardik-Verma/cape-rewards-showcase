@@ -31,6 +31,9 @@
         <nav class="flex-grow p-4 space-y-2">
             <button onclick="switchTab('users')" id="tab-btn-users" class="w-full text-left px-4 py-3 bg-white/10 text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Users</button>
             <button onclick="switchTab('items')" id="tab-btn-items" class="w-full text-left px-4 py-3 text-gray-500 hover:bg-white/5 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Items</button>
+            <button onclick="switchTab('orders')" id="tab-btn-orders" class="w-full text-left px-4 py-3 text-gray-500 hover:bg-white/5 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Orders</button>
+            <button onclick="switchTab('settings')" id="tab-btn-settings" class="w-full text-left px-4 py-3 text-gray-500 hover:bg-white/5 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Settings</button>
+            <button onclick="switchTab('legal')" id="tab-btn-legal" class="w-full text-left px-4 py-3 text-gray-500 hover:bg-white/5 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Legal Pages</button>
         </nav>
         <div class="p-4 border-t border-white/5">
             <button onclick="logout()" class="w-full text-center px-4 py-3 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-colors">Logout</button>
@@ -65,7 +68,7 @@
                         <tbody id="users-table-body" class="divide-y divide-white/5">
                             <!-- JS populated -->
                         </tbody>
-                    </table></div>
+                    </table>
                 </div>
             </div>
 
@@ -89,7 +92,135 @@
                         <tbody id="items-table-body" class="divide-y divide-white/5">
                             <!-- JS populated -->
                         </tbody>
-                    </table></div>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div id="tab-orders" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold uppercase tracking-widest">Redemption Requests</h2>
+                    <span id="orders-count" class="text-[10px] text-gray-600 uppercase font-bold tracking-widest"></span>
+                </div>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-sm text-gray-400">
+                        <thead class="text-xs uppercase bg-black/50 border-b border-white/10 tracking-widest">
+                            <tr>
+                                <th class="px-6 py-4 font-bold">User</th>
+                                <th class="px-6 py-4 font-bold">Item</th>
+                                <th class="px-6 py-4 font-bold">Points</th>
+                                <th class="px-6 py-4 font-bold">Date</th>
+                                <th class="px-6 py-4 font-bold">Status</th>
+                                <th class="px-6 py-4 font-bold">Code</th>
+                                <th class="px-6 py-4 font-bold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body" class="divide-y divide-white/5">
+                            <!-- JS populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="tab-settings" class="hidden space-y-6 max-w-2xl">
+                <div>
+                    <h2 class="text-lg font-bold uppercase tracking-widest">Site Settings</h2>
+                    <p class="text-gray-500 text-xs mt-1">Bitcotasks configuration, Discord, and account security.</p>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-widest mb-3">Bitcotasks Offerwall Configuration</h3>
+                    <p class="text-[11px] text-gray-600 mb-4">Get these from <b>Bitcotasks Dashboard → My Apps → Edit</b>.</p>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Offerwall URL</label>
+                            <input type="text" id="setting-bitcotasks-url" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3" placeholder="https://bitcotasks.com/offerwall/YOUR_API_KEY/">
+                            <p class="text-[10px] text-gray-600 mt-1">Full URL including <code>/offerwall/</code> and trailing slash. The API key is extracted automatically.</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Postback Secret Key</label>
+                            <input type="text" id="setting-postback-secret" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3" placeholder="Secret Key from Bitcotasks Dashboard">
+                            <p class="text-[10px] text-gray-600 mt-1">Used for <code>md5(subId + transId + reward + SecretKey)</code> signature verification. Must match Bitcotasks Dashboard → Secret Key.</p>
+                        </div>
+                        <button onclick="saveBitcotasksConfig()" class="bg-white text-black hover:bg-gray-200 px-6 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors whitespace-nowrap">Save Bitcotasks Config</button>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-widest mb-3">Bitcotasks Postback URL</h3>
+                    <p class="text-[11px] text-gray-600 mb-3">Paste this URL into the <b>Bitcotasks Dashboard → Postback URL</b> field. Bitcotasks sends POST with form data automatically.</p>
+                    <div class="flex items-center gap-2">
+                        <code id="setting-postback-url" class="flex-grow text-[11px] text-emerald-400 bg-black/50 border border-white/10 rounded-lg p-3 break-all">https://YOUR-DOMAIN.com/api/postback</code>
+                        <button onclick="copyPostbackURL()" class="bg-white text-black hover:bg-gray-200 px-4 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors whitespace-nowrap">Copy</button>
+                    </div>
+                    <p class="text-[11px] text-gray-600 mt-2">Signature: <b>md5(subId + transId + reward + SecretKey)</b> — must respond with exactly <code class="text-emerald-400">ok</code>. Whitelist Bitcotasks IP <code class="text-gray-300">45.14.135.48</code> if your host requires it.</p>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-widest mb-3">Discord Invite Link</h3>
+                    <p class="text-[11px] text-gray-600 mb-3">Used in claim modals and email notifications.</p>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="setting-discord-invite" class="flex-grow bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3" placeholder="https://discord.gg/...">
+                        <button onclick="saveDiscordInvite()" class="bg-white text-black hover:bg-gray-200 px-4 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors whitespace-nowrap">Save</button>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-widest mb-1">Account Security</h3>
+                    <p class="text-[11px] text-gray-600 mb-5">Logged in as <span id="admin-email" class="text-white font-bold">...</span> &nbsp;•&nbsp; role: <span class="text-purple-400 font-bold uppercase">Admin</span></p>
+
+                    <div class="space-y-5">
+                        <div class="border border-white/10 rounded-xl p-4">
+                            <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-2">Change Email</label>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="password" id="security-current-password" autocomplete="current-password" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3" placeholder="Current password">
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-2 mt-2">
+                                <input type="email" id="security-new-email" autocomplete="email" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3" placeholder="New email address">
+                                <button onclick="saveEmail()" class="bg-white text-black hover:bg-gray-200 px-6 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors whitespace-nowrap">Update Email</button>
+                            </div>
+                            <p class="text-[10px] text-gray-600 mt-1">Enter your current password plus the new email.</p>
+                        </div>
+
+                        <div class="border border-white/10 rounded-xl p-4">
+                            <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-2">Change Password</label>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="password" id="security-current-pass-pw" autocomplete="current-password" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3" placeholder="Current password">
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-2 mt-2">
+                                <input type="password" id="security-new-password" autocomplete="new-password" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3" placeholder="New password (min 8 characters)">
+                                <button onclick="savePassword()" class="bg-white text-black hover:bg-gray-200 px-6 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors whitespace-nowrap">Update Password</button>
+                            </div>
+                            <p class="text-[10px] text-gray-600 mt-1">New password must be at least 8 characters.</p>
+                        </div>
+                    </div>
+
+                    <div id="security-status" class="hidden mt-4 text-xs font-bold uppercase tracking-widest"></div>
+                </div>
+            </div>
+
+            <!-- Legal Pages Tab -->
+            <div id="tab-legal" class="hidden space-y-6 max-w-3xl">
+                <div>
+                    <h2 class="text-lg font-bold uppercase tracking-widest">Legal Pages</h2>
+                    <p class="text-gray-500 text-xs mt-1">Edit the Terms of Service and Privacy Policy. They update instantly on <b class="text-gray-300">/tos.html</b> and <b class="text-gray-300">/privacy.html</b>.</p>
+                </div>
+                <div class="glass-panel rounded-2xl p-6 space-y-5">
+                    <div>
+                        <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-2">Terms of Service</label>
+                        <textarea id="legal-tos" rows="14" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3 font-mono" placeholder="Enter Terms of Service content..."></textarea>
+                        <p class="text-[11px] text-gray-600 mt-1">Basic HTML is allowed (&lt;h3&gt;, &lt;p&gt;, &lt;b&gt;). Leave empty to keep the built-in default text.</p>
+                    </div>
+                    <div class="border-t border-white/10 pt-4">
+                        <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-2">Privacy Policy</label>
+                        <textarea id="legal-privacy" rows="14" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-3 font-mono" placeholder="Enter Privacy Policy content..."></textarea>
+                        <p class="text-[11px] text-gray-600 mt-1">Basic HTML is allowed. Leave empty to keep the built-in default text.</p>
+                    </div>
+                    <div class="flex justify-end">
+                        <button onclick="saveLegal()" class="bg-white text-black hover:bg-gray-200 px-8 py-3 rounded-lg text-xs font-black uppercase tracking-widest transition-colors">Save Legal Pages</button>
+                    </div>
+                    <div id="legal-status" class="hidden text-xs font-bold uppercase tracking-widest"></div>
                 </div>
             </div>
 
@@ -150,6 +281,10 @@
                         <input type="number" id="item-stock" class="w-full bg-black/50 border border-white/10 text-white text-sm rounded-lg p-2" value="-1" title="-1 for unlimited">
                     </div>
                 </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="item-auto-deliver" class="w-4 h-4 accent-emerald-500">
+                    <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold cursor-pointer" for="item-auto-deliver">Auto Deliver (No Discord ticket needed)</label>
+                </div>
                 <div>
                     <label class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Image URL (Hosted via ImgBB)</label>
                     <div class="flex flex-wrap gap-2 items-center">
@@ -194,17 +329,31 @@
         function switchTab(tab) {
             document.getElementById('tab-users').classList.add('hidden');
             document.getElementById('tab-items').classList.add('hidden');
+            document.getElementById('tab-orders').classList.add('hidden');
+            document.getElementById('tab-settings').classList.add('hidden');
+            document.getElementById('tab-legal').classList.add('hidden');
             
             document.getElementById('tab-btn-users').classList.remove('bg-white/10', 'text-white');
             document.getElementById('tab-btn-users').classList.add('text-gray-500');
             document.getElementById('tab-btn-items').classList.remove('bg-white/10', 'text-white');
             document.getElementById('tab-btn-items').classList.add('text-gray-500');
+            document.getElementById('tab-btn-orders').classList.remove('bg-white/10', 'text-white');
+            document.getElementById('tab-btn-orders').classList.add('text-gray-500');
+            document.getElementById('tab-btn-settings').classList.remove('bg-white/10', 'text-white');
+            document.getElementById('tab-btn-settings').classList.add('text-gray-500');
+            document.getElementById('tab-btn-legal').classList.remove('bg-white/10', 'text-white');
+            document.getElementById('tab-btn-legal').classList.add('text-gray-500');
 
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
             document.getElementById(`tab-btn-${tab}`).classList.add('bg-white/10', 'text-white');
             document.getElementById(`tab-btn-${tab}`).classList.remove('text-gray-500');
 
-            document.getElementById('page-title').innerText = tab === 'users' ? 'Users Management' : 'Store Items';
+            const titles = { users: 'Users Management', items: 'Store Items', orders: 'Redemption Requests', settings: 'Site Settings', legal: 'Legal Pages' };
+            document.getElementById('page-title').innerText = titles[tab] || 'Admin Panel';
+
+            if (tab === 'settings') loadSettings();
+            if (tab === 'legal') loadLegal();
+            if (tab === 'orders') loadOrders();
         }
 
         async function fetchWithAuth(url, options = {}) {
@@ -243,7 +392,7 @@
                     </td>
                     <td class="px-6 py-4 font-bold text-emerald-400">${u.balance} PTS</td>
                     <td class="px-6 py-4 text-right">
-                        <button onclick="openUserModal(${u.id})" class="text-blue-400 hover:text-white uppercase text-[10px] font-bold tracking-widest border border-blue-400/50 hover:bg-blue-500/20 px-3 py-1 rounded transition-colors">Manage</button>
+                        <button onclick="openUserModal('${u.id}')" class="text-blue-400 hover:text-white uppercase text-[10px] font-bold tracking-widest border border-blue-400/50 hover:bg-blue-500/20 px-3 py-1 rounded transition-colors">Manage</button>
                     </td>
                 </tr>
             `).join('');
@@ -297,6 +446,48 @@
             closeModals();
         }
 
+        // --- ORDERS ---
+        async function loadOrders() {
+            const res = await fetchWithAuth('/api/admin/orders');
+            const data = await res.json();
+            renderOrders(data.orders || []);
+        }
+
+        function renderOrders(orders) {
+            const tbody = document.getElementById('orders-table-body');
+            document.getElementById('orders-count').innerText = orders.length + ' TOTAL';
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-10 text-center text-gray-600 uppercase tracking-widest font-bold text-xs">No redemption requests yet</td></tr>';
+                return;
+            }
+            tbody.innerHTML = orders.map(o => `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-6 py-4"><div class="text-white font-bold">${o.username}</div></td>
+                    <td class="px-6 py-4 text-white">${o.name}</td>
+                    <td class="px-6 py-4 font-bold text-emerald-400">${o.points} PTS</td>
+                    <td class="px-6 py-4 text-gray-500">${o.date}</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-block px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest ${o.redeemed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-yellow-500/20 text-yellow-500'}">${o.redeemed ? 'Delivered' : 'Pending'}</span>
+                    </td>
+                    <td class="px-6 py-4 font-mono text-xs text-gray-300">${o.redeemCode || (o.redeemed ? 'AUTO-DELIVERED' : '—')}</td>
+                    <td class="px-6 py-4 text-right">
+                        ${o.redeemed ? '' : `<button onclick="markDelivered('${o.id}')" class="text-emerald-400 hover:text-white uppercase text-[10px] font-bold tracking-widest border border-emerald-400/50 hover:bg-emerald-500/20 px-3 py-1 rounded transition-colors">Mark Delivered</button>`}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function markDelivered(id) {
+            if (!confirm('Mark this request as delivered? This happens manually after handing out the reward in the Discord ticket.')) return;
+            const res = await fetchWithAuth(`/api/admin/orders/${id}/deliver`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                loadOrders();
+            } else {
+                alert('Failed to update order.');
+            }
+        }
+
         // --- ITEMS ---
         async function loadItems() {
             const res = await fetch('/api/items'); // public endpoint
@@ -339,6 +530,7 @@
                 document.getElementById('item-cost').value = item.cost;
                 document.getElementById('item-stock').value = item.stock;
                 document.getElementById('item-image').value = item.image;
+                document.getElementById('item-auto-deliver').checked = !!item.autoDeliver;
             } else {
                 document.getElementById('item-modal-title').innerText = 'Add Item';
                 document.getElementById('item-id').value = '';
@@ -348,6 +540,7 @@
                 document.getElementById('item-cost').value = '';
                 document.getElementById('item-stock').value = '-1';
                 document.getElementById('item-image').value = '';
+                document.getElementById('item-auto-deliver').checked = false;
             }
             document.getElementById('item-modal').classList.remove('hidden');
             document.getElementById('item-modal').classList.add('flex');
@@ -410,7 +603,8 @@
                 type: document.getElementById('item-type').value,
                 cost: parseInt(document.getElementById('item-cost').value),
                 stock: parseInt(document.getElementById('item-stock').value),
-                image: document.getElementById('item-image').value
+                image: document.getElementById('item-image').value,
+                autoDeliver: document.getElementById('item-auto-deliver').checked
             };
             if (!item.id || !item.name || isNaN(item.cost) || !item.image) return alert("Please fill all fields");
 
@@ -420,6 +614,192 @@
             });
             loadItems();
             closeModals();
+        }
+
+        // --- SETTINGS ---
+        async function loadSettings() {
+            // Show the correct postback URL for the live domain
+            const pbEl = document.getElementById('setting-postback-url');
+            if (pbEl) pbEl.innerText = `${window.location.origin}/api/postback`;
+
+            // Load Bitcotasks config
+            try {
+                const res = await fetchWithAuth('/api/config/bitcotasks');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('setting-bitcotasks-url').value = data.offerwallUrl || '';
+                    document.getElementById('setting-postback-secret').value = data.postbackSecret || '';
+                }
+            } catch (e) {}
+
+            // Load Discord invite
+            try {
+                const res = await fetchWithAuth('/api/config/site');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('setting-discord-invite').value = data.discordInviteLink || '';
+                }
+            } catch (e) {}
+
+            // Show the logged-in admin's email
+            try {
+                const res = await fetchWithAuth('/api/me');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('admin-email').innerText = data.user.email || '(no email set)';
+                }
+            } catch (e) {}
+        }
+
+        async function saveBitcotasksConfig() {
+            const offerwallUrl = document.getElementById('setting-bitcotasks-url').value.trim();
+            const postbackSecret = document.getElementById('setting-postback-secret').value.trim();
+            if (!offerwallUrl) return alert('Offerwall URL is required');
+            if (!postbackSecret || postbackSecret.length < 6) return alert('Postback Secret must be at least 6 characters');
+
+            try {
+                const res = await fetchWithAuth('/api/config/bitcotasks', {
+                    method: 'POST',
+                    body: JSON.stringify({ offerwallUrl, postbackSecret })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Bitcotasks config saved!');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (e) {
+                alert('Network error');
+            }
+        }
+
+        async function saveDiscordInvite() {
+            const discordInviteLink = document.getElementById('setting-discord-invite').value.trim();
+            if (!discordInviteLink || !/^https?:\/\//.test(discordInviteLink)) return alert('A valid invite link (http/https) is required');
+
+            try {
+                const res = await fetchWithAuth('/api/config/site', {
+                    method: 'POST',
+                    body: JSON.stringify({ discordInviteLink })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Discord invite saved!');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (e) {
+                alert('Network error');
+            }
+        }
+
+        async function copyPostbackURL() {
+            const el = document.getElementById('setting-postback-url');
+            if (!el) return;
+            try {
+                await navigator.clipboard.writeText(el.innerText);
+                const btn = event && event.currentTarget;
+                if (btn) {
+                    const original = btn.innerText;
+                    btn.innerText = 'Copied!';
+                    setTimeout(() => { btn.innerText = original; }, 1500);
+                }
+            } catch (e) {
+                const t = document.createElement('textarea');
+                t.value = el.innerText;
+                t.style.position = 'fixed';
+                t.style.left = '-9999px';
+                document.body.appendChild(t);
+                t.select();
+                document.execCommand('copy');
+                t.remove();
+            }
+        }
+
+        function showSecurityStatus(message, isError) {
+            const el = document.getElementById('security-status');
+            el.innerText = message;
+            el.classList.remove('hidden', 'text-emerald-500', 'text-red-500');
+            el.classList.add(isError ? 'text-red-500' : 'text-emerald-500');
+            setTimeout(() => el.classList.add('hidden'), 4000);
+        }
+
+        async function saveEmail() {
+            const password = document.getElementById('security-current-password').value.trim();
+            const email = document.getElementById('security-new-email').value.trim();
+            if (!password || !email) return alert('Enter your current password and the new email.');
+
+            try {
+                const res = await fetchWithAuth('/api/profile/email', {
+                    method: 'POST',
+                    body: JSON.stringify({ password, email })
+                });
+                const data = await res.json();
+                if (!data.success) return showSecurityStatus(data.error || 'Failed to update email.', true);
+                document.getElementById('security-current-password').value = '';
+                document.getElementById('security-new-email').value = '';
+                document.getElementById('admin-email').innerText = email;
+                showSecurityStatus('Email updated!');
+            } catch (e) {
+                showSecurityStatus('Network error.', true);
+            }
+        }
+
+        async function savePassword() {
+            const currentPassword = document.getElementById('security-current-pass-pw').value.trim();
+            const newPassword = document.getElementById('security-new-password').value.trim();
+            if (!currentPassword || !newPassword) return alert('Enter your current and new passwords.');
+            if (newPassword.length < 8) return alert('New password must be at least 8 characters.');
+
+            try {
+                const res = await fetchWithAuth('/api/profile/password', {
+                    method: 'POST',
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+                const data = await res.json();
+                if (!data.success) return showSecurityStatus(data.error || 'Failed to update password.', true);
+                document.getElementById('security-current-pass-pw').value = '';
+                document.getElementById('security-new-password').value = '';
+                showSecurityStatus('Password updated!');
+            } catch (e) {
+                showSecurityStatus('Network error.', true);
+            }
+        }
+
+        // --- LEGAL PAGES ---
+        async function loadLegal() {
+            try {
+                const res = await fetchWithAuth('/api/config/legal');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('legal-tos').value = data.tos || '';
+                    document.getElementById('legal-privacy').value = data.privacy || '';
+                }
+            } catch (e) {}
+        }
+
+        async function saveLegal() {
+            const tos = document.getElementById('legal-tos').value;
+            const privacy = document.getElementById('legal-privacy').value;
+
+            try {
+                const res = await fetchWithAuth('/api/config/legal', {
+                    method: 'POST',
+                    body: JSON.stringify({ tos, privacy })
+                });
+                const data = await res.json();
+                const statusEl = document.getElementById('legal-status');
+                statusEl.classList.remove('hidden', 'text-red-500');
+                statusEl.classList.add('text-emerald-500');
+                statusEl.innerText = data.success ? 'Legal pages saved!' : (data.error || 'Failed to save.');
+                setTimeout(() => statusEl.classList.add('hidden'), 3000);
+            } catch (e) {
+                const st = document.getElementById('legal-status');
+                st.classList.remove('hidden');
+                st.classList.add('text-red-500');
+                st.innerText = 'Network error.';
+                setTimeout(() => st.classList.add('hidden'), 3000);
+            }
         }
 
         // --- GLOBAL ---

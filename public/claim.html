@@ -451,8 +451,9 @@
                         // Auto-delivered item (e.g., Giveaway Entry)
                         alert(data.message || 'Entry submitted automatically!');
                     } else {
-                        // Manual redemption - show order ref and Discord button
-                        document.getElementById('key-display').innerText = data.orderRef || 'PENDING';
+                        // Manual redemption - show redeem code and Discord button
+                        const displayCode = data.redeemCode || data.orderRef || 'PENDING';
+                        document.getElementById('key-display').innerText = displayCode;
                         const discordBtn = document.getElementById('success-discord-btn');
                         discordBtn.href = siteConfig.discordInviteLink || 'https://discord.gg/tgCFxYD948';
                         document.getElementById('success-modal').classList.remove('hidden');

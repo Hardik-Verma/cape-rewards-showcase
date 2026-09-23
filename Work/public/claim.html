@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earn Rewards | CAPEVERSE</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { obsidian: '#000000' }, fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap');
+        body { background-color: #030303; color: #ffffff; overflow-x: hidden; font-family: 'Inter', sans-serif; }
+        
+        /* Starry Background */
+        .stars {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -2;
+            background: #030303;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: fall linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-100vh) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100vh) translateX(-20vw); opacity: 0; }
+        }
+
+        /* Generate multiple stars via box-shadow in a single div to save DOM nodes */
+        .stars-layer1 {
+            width: 1px; height: 1px; background: transparent;
+            box-shadow: 10vw 20vh #fff, 30vw 40vh #fff, 50vw 10vh #fff, 70vw 80vh #fff, 90vw 30vh #fff, 20vw 60vh #fff, 80vw 50vh #fff, 40vw 90vh #fff, 60vw 70vh #fff;
+            animation: animStar 50s linear infinite;
+        }
+        
+        @keyframes animStar {
+            from { transform: translateY(-100vh); }
+            to { transform: translateY(100vh); }
+        }
+
+        .nav-glass { background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+
+        .btn-premium { background: #ffffff; color: #000000; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-premium:hover { background: #e0e0e0; transform: scale(1.02); }
+
+        .glass-panel {
+            background: #0a0a0a;
+            border-radius: calc(1rem - 1px) !important;
+            position: relative;
+            z-index: 2;
+        }
+
+        body { animation: fadeIn 1s ease forwards; }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+
+        /* Animated Glowing Border */
+        .glow-border {
+            position: relative;
+            border-radius: 1rem !important;
+            overflow: hidden;
+            padding: 1px;
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .glow-border::before {
+            content: "";
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, transparent 70%, #dc2626 100%);
+            animation: rotate-border 4s linear infinite;
+            z-index: -1;
+        }
+        @keyframes rotate-border {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-[#030303]">
+
+    <!-- Starry Background -->
+    <div class="stars">
+        <div class="stars-layer1" style="width: 2px; height: 2px; box-shadow: 10vw 10vh #fff, 20vw 20vh #fff, 30vw 30vh #fff, 40vw 40vh #fff, 50vw 50vh #fff, 60vw 60vh #fff, 70vw 70vh #fff, 80vw 80vh #fff, 90vw 90vh #fff, 15vw 85vh #fff, 25vw 75vh #fff, 35vw 65vh #fff, 45vw 55vh #fff, 55vw 45vh #fff, 65vw 35vh #fff, 75vw 25vh #fff, 85vw 15vh #fff, 95vw 5vh #fff;"></div>
+    </div>
+
+    <div id="nav-root"></div>
+
+    <main class="flex-grow flex flex-col items-center justify-start pt-28 pb-12 px-4 sm:px-6 lg:px-8 z-20 w-full max-w-6xl mx-auto">
+        <!-- Cashout Widget & Header -->
+        <div class="w-full flex flex-col md:flex-row gap-6 mb-12 items-center justify-between">
+            <div class="text-center md:text-left">
+                <h2 class="text-4xl md:text-5xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-2">Offerwall</h2>
+                <p class="text-sm tracking-widest uppercase text-gray-500 font-semibold">Complete tasks to earn points.</p>
+            </div>
+            
+            <!-- Cashout Card -->
+            <div class="glow-border w-full md:w-96">
+                <div class="glass-panel w-full rounded-2xl p-6 relative flex flex-col gap-4 bg-[#0a0a0a]">
+                    <div class="flex justify-between items-center border-b border-white/10 pb-4">
+                        <span class="text-gray-400 uppercase tracking-widest text-xs font-bold">Balance</span>
+                        <span class="text-emerald-400 font-black text-xl" id="balance-display">0 <span class="text-sm text-gray-500 uppercase" id="currency-label">PTS</span></span>
+                    </div>
+                    <div class="flex justify-end items-center gap-2">
+                        <a href="/history.html" title="Order History" class="bg-white/5 text-gray-400 hover:text-white py-3 px-4 rounded-xl transition-colors block">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </a>
+                        <button id="cashout-btn" onclick="openCashoutModal()" class="bg-white/10 text-gray-500 cursor-not-allowed font-bold py-3 px-6 rounded-xl tracking-wide uppercase text-xs transition-colors duration-300 flex items-center w-full justify-center" disabled>
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg> Cashout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Offers Grid -->
+        <div class="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="offers-grid">
+            <!-- Rendered by JS -->
+        </div>
+    
+        <!-- Modals (Hidden by default) -->
+        <!-- Cashout Modal -->
+        <div id="cashout-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm">
+            <div class="glow-border w-full max-w-md w-full sm:mx-4">
+                <div class="glass-panel w-full rounded-2xl p-5 sm:p-8 relative">
+                    <button onclick="closeCashoutModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                    <h3 class="text-xl font-black text-white mb-6 uppercase tracking-widest text-center">Select Reward</h3>
+                    
+                    <div class="space-y-4" id="rewards-list">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Success Modal -->
+        <div id="success-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm">
+            <div class="glow-border w-full max-w-md w-full sm:mx-4">
+                <div class="glass-panel w-full rounded-2xl p-5 sm:p-8 relative text-center">
+                    <button onclick="closeSuccessModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                    <div class="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/50">
+                        <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white tracking-wide mb-2">Request Submitted!</h3>
+                    <p class="text-gray-400 text-sm mb-2">Your points are reserved and your reward request is in. Join our Discord and open a <span class="text-white font-bold">ticket</span> — our team will deliver your reward to you manually.</p>
+                    <p class="text-gray-500 text-xs mb-6">Include your username and the ticket reference below.</p>
+                    
+                    <div class="bg-black/80 border border-gray-800 rounded-xl p-6 relative group mb-6">
+                        <code id="key-display" class="selectable block text-center text-white font-mono text-xl break-all select-all">Loading...</code>
+                        <button onclick="copyKey(this)" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors" title="Copy to clipboard">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        </button>
+                    </div>
+
+                    <a href="#" id="success-discord-btn" data-discord-invite target="_blank" class="block w-full bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold py-4 px-6 rounded-xl uppercase tracking-widest text-xs transition-colors duration-300">
+                        Open Discord & Create a Ticket
+                    </a>
+
+                    <p class="text-[0.6rem] text-gray-500 uppercase tracking-widest mt-4">Requests stay Pending until our team delivers it in Discord.</p>
+                </div>
+            </div>
+        </div>
+        
+    </main>
+
+    <!-- Professional Footer -->
+    <footer class="w-full py-16 border-t border-white/5 bg-[#030303] relative z-20 mt-auto">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+                
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center gap-3 mb-6">
+                        <img src="/logo.png" alt="Logo" class="h-8 opacity-80">
+                        <span class="text-white font-bold text-base tracking-widest sm:tracking-[0.2em] uppercase pt-0.5">CAPEVERSE</span>
+                    </div>
+                    <p class="text-gray-600 text-xs leading-relaxed max-w-sm mb-6">
+                        The premier platform for authenticated digital cosmetics. We pride ourselves on security, speed, and reliability.
+                    </p>
+                    <div class="flex items-center gap-4 mb-6">
+                        <a href="https://discord.gg/tgCFxYD948" target="_blank" class="text-gray-500 hover:text-[#5865F2] transition-colors" title="Join our Discord">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                        </a>
+                    </div>
+                    <div class="text-gray-700 text-[10px] uppercase tracking-widest">
+                        &copy; 2026 CAPEVERSE. All Rights Reserved.
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold text-xs tracking-widest uppercase mb-6">Platform</h4>
+                    <ul class="space-y-4 text-xs font-medium text-gray-500">
+                        <li><a href="/index.html" class="hover:text-red-500 transition-colors">Showcase</a></li>
+                        <li><a href="/about.html" class="hover:text-red-500 transition-colors">About Us</a></li>
+                        <li><a href="/claim.html" class="hover:text-red-500 transition-colors">Claim Portal</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold text-xs tracking-widest uppercase mb-6">Legal & Support</h4>
+                    <ul class="space-y-4 text-xs font-medium text-gray-500">
+                        <li><a href="/support.html" class="hover:text-red-500 transition-colors">Support Center</a></li>
+                        <li><a href="/tos.html" class="hover:text-white transition-colors cursor-pointer">Terms of Service</a></li>
+                        <li><a href="/privacy.html" class="hover:text-white transition-colors cursor-pointer">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- AUTH LOGIC ---
+        const authToken = localStorage.getItem('auth_token');
+        if (!authToken) {
+            window.location.href = '/preview.html';
+        }
+
+        let currentUser = null;
+        let generatedToken = null;
+
+        async function fetchUser() {
+            try {
+                const res = await fetch('/api/me', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    localStorage.removeItem('auth_token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                currentUser = data.user;
+                setBalance(currentUser.balance);
+                
+                // Now we can init offers since we have user ID
+                initOffers();
+
+            } catch (e) {
+                console.error(e);
+                localStorage.removeItem('auth_token');
+                window.location.href = '/login.html';
+            }
+        }
+
+        // --- ANTI-BYPASS & DEVTOOLS PROTECTION ---
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', function(e) {
+            if(e.keyCode == 123) e.preventDefault(); 
+            if(e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) e.preventDefault();
+            if(e.ctrlKey && e.keyCode == 85) e.preventDefault();
+        });
+
+        // --- EASY CONFIGURATION OBJECT ---
+        const CONFIG = {
+            currencyName: "Points",
+            cashoutThreshold: 0
+        };
+
+        document.getElementById('currency-label').innerText = CONFIG.currencyName;
+
+        const offersGrid = document.getElementById('offers-grid');
+        let siteConfig = {};
+
+        async function fetchSiteConfig() {
+            try {
+                const cfgRes = await fetch('/api/config');
+                siteConfig = await cfgRes.json();
+            } catch (e) {
+                console.error('Failed to fetch config:', e);
+                siteConfig = {};
+            }
+        }
+
+        async function initOffers() {
+            // The API key never reaches this page — the server builds the offerwall URL
+            // and the iframe is served through a keyless gateway endpoint.
+            await fetchSiteConfig();
+
+            try {
+                const statusRes = await fetch('/api/offerwall/status', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const status = await statusRes.json();
+
+                if (!status.valid) {
+                    const waiting = status.reason === 'empty';
+                    offersGrid.innerHTML = `
+                        <div class="col-span-full text-center py-12 bg-[#0a0a0a] border border-white/5 rounded-2xl p-6">
+                            <div class="text-yellow-500 font-bold text-base mb-2">Offerwall Coming Soon</div>
+                            <p class="text-gray-400 text-xs max-w-md mx-auto mb-4">${waiting ? "The offers section isn't configured yet." : "The Bitcotasks offerwall connection is invalid."} Please contact the administrator if this persists.</p>
+                        </div>
+                    `;
+                    return;
+                }
+            } catch (e) {
+                console.error('Offerwall status check failed:', e);
+            }
+
+            // Grab a short-lived scoped ticket instead of exposing the session JWT in the iframe URL
+            let ticket = null;
+            try {
+                const tRes = await fetch('/api/offerwall/ticket', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const tData = await tRes.json();
+                ticket = tData.ticket;
+            } catch (e) {
+                console.error('Offerwall ticket failed:', e);
+            }
+
+            if (!ticket) {
+                offersGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12 bg-[#0a0a0a] border border-white/5 rounded-2xl p-6">
+                        <div class="text-yellow-500 font-bold text-base mb-2">Offerwall Not Ready</div>
+                        <p class="text-gray-400 text-xs max-w-md mx-auto mb-4">Please refresh the page to load the offers.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Keyless iframe — the server 302s this to Bitcotasks without exposing the key
+            offersGrid.innerHTML = `
+                <div class="col-span-full flex flex-col gap-3">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Complete offers below to earn points instantly.</p>
+                    <div class="w-full rounded-2xl overflow-hidden border border-white/10" style="height: 750px;">
+                        <iframe id="offerwall-frame" src="/api/offerwall/go?ticket=${encodeURIComponent(ticket)}" title="Bitcotasks Offerwall" class="w-full h-full" style="border:0; background:#ffffff;" loading="lazy" referrerpolicy="no-referrer" allow="clipboard-write"></iframe>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate Cashout Rewards from DB
+        const rewardsList = document.getElementById('rewards-list');
+        
+        async function loadItems() {
+            try {
+                const res = await fetch('/api/items');
+                const data = await res.json();
+                if (data.success) {
+                    rewardsList.innerHTML = data.items.map(r => `
+                        <button onclick="redeemReward('${r.id}', ${r.cost}, '${r.name}')" class="w-full flex items-center justify-between bg-black/50 border border-white/10 hover:border-red-500 p-3 sm:p-4 rounded-xl transition-colors group">
+                            <div class="flex items-center gap-4">
+                                <img src="${r.image}" class="w-10 h-10 object-contain group-hover:scale-110 transition-transform">
+                                <div class="text-left">
+                                    <div class="text-white font-bold text-sm">${r.name}</div>
+                                    <div class="text-gray-500 text-[10px] uppercase tracking-widest">${r.type} &bull; Stock: ${r.stock === -1 ? 'Unlimited' : r.stock}</div>
+                                </div>
+                            </div>
+                            <div class="text-emerald-400 font-bold">${r.cost} <span class="text-xs text-gray-500 uppercase">${CONFIG.currencyName}</span></div>
+                        </button>
+                    `).join('');
+                }
+            } catch (e) {}
+        }
+        
+        loadItems();
+
+
+
+        // --- REAL BITCOTASKS POLLING ---
+        // Constantly check the server to see if Bitcotasks sent a real postback
+        setInterval(async () => {
+            if (!currentUser) return;
+            try {
+                const res = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${authToken}` } });
+                const data = await res.json();
+                if (data.success) {
+                    if (data.user.balance > currentUser.balance) {
+                        const earned = data.user.balance - currentUser.balance;
+                        currentUser.balance = data.user.balance;
+                        setBalance(currentUser.balance);
+                        alert(`Offer completed on partner site! You earned ${earned} ${CONFIG.currencyName}.`);
+                    } else if (data.user.balance < currentUser.balance) {
+                        // Balance went down (e.g. from cashout or admin edit), just update silently
+                        currentUser.balance = data.user.balance;
+                        setBalance(currentUser.balance);
+                    }
+                }
+            } catch(e) {}
+        }, 5000);
+
+        function setBalance(amount) {
+            document.getElementById('balance-display').innerHTML = `${amount} <span class="text-sm text-gray-500 uppercase">${CONFIG.currencyName}</span>`;
+            const cashoutBtn = document.getElementById('cashout-btn');
+            if (amount >= CONFIG.cashoutThreshold) {
+                cashoutBtn.disabled = false;
+                cashoutBtn.classList.remove('bg-white/10', 'text-gray-500', 'cursor-not-allowed');
+                cashoutBtn.classList.add('bg-white', 'text-black', 'hover:bg-red-600', 'hover:text-white');
+            } else {
+                cashoutBtn.disabled = true;
+                cashoutBtn.classList.add('bg-white/10', 'text-gray-500', 'cursor-not-allowed');
+                cashoutBtn.classList.remove('bg-white', 'text-black', 'hover:bg-red-600', 'hover:text-white');
+            }
+        }
+
+        function openCashoutModal() {
+            if(currentUser && currentUser.balance >= CONFIG.cashoutThreshold) {
+                document.getElementById('cashout-modal').classList.remove('hidden');
+                document.getElementById('cashout-modal').classList.add('flex');
+            }
+        }
+
+        function closeCashoutModal() {
+            document.getElementById('cashout-modal').classList.add('hidden');
+            document.getElementById('cashout-modal').classList.remove('flex');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('success-modal').classList.add('hidden');
+            document.getElementById('success-modal').classList.remove('flex');
+        }
+
+        async function redeemReward(rewardId, cost, rewardName) {
+            if(currentUser.balance < cost) return alert("Not enough points!");
+            
+            closeCashoutModal();
+            
+            try {
+                const res = await fetch('/api/cashout', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ rewardId, cost, rewardName })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    setBalance(currentUser.balance - cost); // Frontend update
+                    currentUser.balance = currentUser.balance - cost;
+                    document.getElementById('key-display').innerText = data.orderRef || 'PENDING';
+                    // Point the Discord button at the admin/env-configured invite link
+                    const discordBtn = document.getElementById('success-discord-btn');
+                    discordBtn.href = siteConfig.discordInviteLink || 'https://discord.gg/tgCFxYD948';
+                    document.getElementById('success-modal').classList.remove('hidden');
+                    document.getElementById('success-modal').classList.add('flex');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch(e) {
+                alert('Network error during cashout. Please try again.');
+            }
+        }
+
+        function copyKey(btnElement, textToCopy) {
+            let text = textToCopy || document.getElementById('key-display').innerText;
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(showCopied).catch(fallbackCopyTextToClipboard);
+            } else {
+                fallbackCopyTextToClipboard();
+            }
+
+            function fallbackCopyTextToClipboard() {
+                let textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showCopied();
+                } catch (err) {}
+                textArea.remove();
+            }
+
+            function showCopied() {
+                if (btnElement) {
+                    const originalHTML = btnElement.innerHTML;
+                    btnElement.innerHTML = '<svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                    btnElement.classList.remove('text-gray-500');
+                    btnElement.classList.add('text-emerald-400');
+                    setTimeout(() => {
+                        btnElement.innerHTML = originalHTML;
+                        btnElement.classList.add('text-gray-500');
+                        btnElement.classList.remove('text-emerald-400');
+                    }, 2000);
+                }
+            }
+        }
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchUser(); // START AUTH FLOW
+
+            
+
+            // PROXY / VPN DETECTION — blocks reward earning from proxies per ToS
+            fetch('/api/proxy-check')
+                .then(r => r.json())
+                .then(check => {
+                    if (check && check.blocked) {
+                        const banner = document.createElement('div');
+                        banner.className = 'fixed top-20 left-0 right-0 z-[90] bg-red-950/90 border-b border-red-600/40 px-4 py-3 text-center';
+                        banner.innerHTML = '<span class="text-red-300 text-xs font-bold uppercase tracking-widest">⚑ Proxy / VPN detected. Earning through proxies is prohibited by our <a href="/tos.html" class="underline hover:text-white">Terms of Service</a> and may result in your points being voided.</span>';
+                        document.body.appendChild(banner);
+
+                        const offerwallFrame = document.getElementById('offerwall-frame');
+                        if (offerwallFrame) offerwallFrame.style.pointerEvents = 'none';
+                    }
+                })
+                .catch(() => {});
+        });
+        
+        function logout() {
+            localStorage.removeItem('auth_token');
+            window.location.href = '/login.html';
+        }
+    </script>
+    <script src="/nav.js"></script>
+    <script src="/auth.js"></script>
+</body>
+</html>

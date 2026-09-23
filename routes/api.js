@@ -9,40 +9,67 @@ const { OAuth2Client } = require('google-auth-library');
 const JWT_SECRET = process.env.JWT_SECRET || 'capeverse-super-secret-key';
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// Secure config for frontend
+// Public config endpoint (no auth) - used by login, register, claim, history pages
 router.get('/config', async (req, res) => {
     let discordInviteLink = process.env.DISCORD_INVITE_LINK || 'https://discord.gg/tgCFxYD948';
+    let offerwallValid = false;
     try {
         const config = await SiteConfig.findOne();
         if (config && config.discordInviteLink) discordInviteLink = config.discordInviteLink;
+        const raw = (config?.bitcotasksOfferwallUrl || process.env.BITCOTASKS_URL || '').trim();
+        if (raw) {
+            const hasPlaceholder = /(\[[^\]]*\]|YOUR_|API_?KEY|OFFERWALL_ID|\{uid\}|\{user_id\}|example|demo)/i.test(raw);
+            const m = raw.match(/^(https?:\/\/[^/]+)\/offerwall\/([^/\s?#]+)/i);
+            const key = m ? m[2] : '';
+            offerwallValid = !hasPlaceholder && !!m && /^[A-Za-z0-9_\-]{8,64}$/.test(key);
+        }
     } catch (e) {
         console.error('Error loading site config:', e);
     }
     res.json({
         googleClientId: process.env.GOOGLE_CLIENT_ID || '',
-        discordInviteLink
+        discordInviteLink,
+        offerwallValid
     });
 });
 
-// Server-side only helper: build the canonical Bitcotasks offerwall URL.
+// Server-side only helper: build the canonical Bitcotasks offerwall URL from DB config.
 // The API key is held here and NEVER returned to the browser.
-function buildOfferwallUrl(base, userId) {
-    const raw = (base || '').trim();
-    if (!raw) return { valid: false, reason: 'empty' };
-    const hasPlaceholder = /(\[[^\]]*\]|YOUR_|API_?KEY|OFFERWALL_ID|\{uid\}|\{user_id\}|example|demo)/i.test(raw);
-    const m = raw.match(/^(https?:\/\/[^/]+)\/offerwall\/([^/\s?#]+)/i);
-    const origin = m ? m[1] : '';
-    const key = m ? m[2] : '';
-    if (hasPlaceholder || !m || !/^[A-Za-z0-9_\-]{8,64}$/.test(key)) {
-        return { valid: false, reason: 'badkey' };
+async function buildOfferwallUrl(userId) {
+    try {
+        const config = await SiteConfig.findOne();
+        const raw = (config?.bitcotasksOfferwallUrl || process.env.BITCOTASKS_URL || '').trim();
+        if (!raw) return { valid: false, reason: 'empty' };
+        const hasPlaceholder = /(\[[^\]]*\]|YOUR_|API_?KEY|OFFERWALL_ID|\{uid\}|\{user_id\}|example|demo)/i.test(raw);
+        const m = raw.match(/^(https?:\/\/[^/]+)\/offerwall\/([^/\s?#]+)/i);
+        const origin = m ? m[1] : '';
+        const key = m ? m[2] : '';
+        if (hasPlaceholder || !m || !/^[A-Za-z0-9_\-]{8,64}$/.test(key)) {
+            return { valid: false, reason: 'badkey' };
+        }
+        return { valid: true, url: `${origin}/offerwall/${key}/${userId}` };
+    } catch (e) {
+        console.error('Error building offerwall URL:', e);
+        return { valid: false, reason: 'error' };
     }
-    return { valid: true, url: `${origin}/offerwall/${key}/${userId}` };
 }
 
 // Safe status check (no secret data) so the page can show a config warning
-router.get('/offerwall/status', authenticateToken, (req, res) => {
-    const built = buildOfferwallUrl(process.env.BITCOTASKS_URL);
-    res.json({ valid: built.valid, reason: built.valid ? null : built.reason });
+router.get('/offerwall/status', authenticateToken, async (req, res) => {
+    try {
+        const config = await SiteConfig.findOne();
+        const raw = (config?.bitcotasksOfferwallUrl || process.env.BITCOTASKS_URL || '').trim();
+        if (!raw) return res.json({ valid: false, reason: 'empty' });
+        const hasPlaceholder = /(\[[^\]]*\]|YOUR_|API_?KEY|OFFERWALL_ID|\{uid\}|\{user_id\}|example|demo)/i.test(raw);
+        const m = raw.match(/^(https?:\/\/[^/]+)\/offerwall\/([^/\s?#]+)/i);
+        const key = m ? m[2] : '';
+        if (hasPlaceholder || !m || !/^[A-Za-z0-9_\-]{8,64}$/.test(key)) {
+            return res.json({ valid: false, reason: 'badkey' });
+        }
+        res.json({ valid: true });
+    } catch (e) {
+        res.json({ valid: false, reason: 'error' });
+    }
 });
 
 // Short-lived, offerwall-scoped ticket — keeps the user's session JWT out of the iframe URL
@@ -53,7 +80,7 @@ router.get('/offerwall/ticket', authenticateToken, (req, res) => {
 
 // Offerwall gateway: keeps the API key on the server and 302s the iframe to
 // Bitcotasks, so the key never appears in our HTML, JS, DOM or API config.
-router.get('/offerwall/go', (req, res) => {
+router.get('/offerwall/go', async (req, res) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
     res.set('Referrer-Policy', 'no-referrer');
     res.set('X-Robots-Tag', 'noindex, nofollow');
@@ -70,7 +97,7 @@ router.get('/offerwall/go', (req, res) => {
         return res.status(401).send('Not authorized');
     }
 
-    const built = buildOfferwallUrl(process.env.BITCOTASKS_URL, userId);
+    const built = await buildOfferwallUrl(userId);
     if (!built.valid) return res.status(500).send('Offerwall is not configured correctly.');
     res.redirect(302, built.url);
 });
@@ -113,6 +140,41 @@ router.post('/config/postback', authenticateAdmin, async (req, res) => {
         await SiteConfig.findOneAndUpdate(
             {},
             { postbackSecret, updatedAt: Date.now() },
+            { upsert: true, new: true }
+        );
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// GET Bitcotasks config (admin only)
+router.get('/config/bitcotasks', authenticateAdmin, async (req, res) => {
+    try {
+        const config = await SiteConfig.findOne();
+        res.json({ 
+            success: true, 
+            apiKey: (config && config.bitcotasksApiKey) || '',
+            offerwallUrl: (config && config.bitcotasksOfferwallUrl) || '',
+            postbackSecret: (config && config.postbackSecret) || ''
+        });
+    } catch (e) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// POST Bitcotasks config (admin only)
+router.post('/config/bitcotasks', authenticateAdmin, async (req, res) => {
+    const { apiKey, offerwallUrl, postbackSecret } = req.body;
+    try {
+        await SiteConfig.findOneAndUpdate(
+            {},
+            { 
+                bitcotasksApiKey: apiKey || '',
+                bitcotasksOfferwallUrl: offerwallUrl || '',
+                postbackSecret: postbackSecret || '',
+                updatedAt: Date.now() 
+            },
             { upsert: true, new: true }
         );
         res.json({ success: true });
@@ -614,24 +676,32 @@ router.post('/cashout', authenticateToken, async (req, res) => {
             await item.save();
         }
 
-        const token = uuidv4();
         const timestamp = Date.now();
 
         const isAutoDeliver = !!item.autoDeliver;
+        
+        // Generate secure random code for capes (non-auto-deliver items)
+        let redeemCode = null;
+        if (!isAutoDeliver) {
+            const randomPart = crypto.randomBytes(6).toString('hex').toUpperCase();
+            redeemCode = 'CAPE-' + randomPart.match(/.{1,4}/g).join('-'); // CAPE-A1B2-C3D4-E5F6
+        }
+
         const order = await Order.create({ 
             user_id: user._id, 
             name: item.name, 
-            token, 
+            token: uuidv4(), 
             points: item.cost, 
             timestamp,
-            redeemed: isAutoDeliver
+            redeemed: isAutoDeliver,
+            redeemCode
         });
 
         const orderRef = String(order._id).slice(-8).toUpperCase();
         if (isAutoDeliver) {
             res.json({ success: true, orderRef, autoDelivered: true, message: 'Entry submitted automatically — no ticket needed!' });
         } else {
-            res.json({ success: true, orderRef });
+            res.json({ success: true, orderRef, redeemCode });
         }
     } catch (e) {
         res.status(500).json({ error: 'Database error' });
@@ -693,6 +763,7 @@ router.get('/admin/orders', authenticateAdmin, async (req, res) => {
             name: r.name,
             points: r.points,
             redeemed: !!r.redeemed,
+            redeemCode: r.redeemCode || null,
             date: new Date(r.timestamp).toLocaleDateString()
         }));
         res.json({ success: true, orders });
